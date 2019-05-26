@@ -1,6 +1,6 @@
 # upload
 
-##主要用到的东西
+## 主要用到的东西
  - element ui用于前端框架
  - vue-pdf用于预览pdf
  - vue-simple-uploader用于上传文件
