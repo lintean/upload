@@ -1,7 +1,8 @@
 # upload
 
 ## 主要用到的东西
- - element ui用于前端框架
+ - vue用于前端框架
+ - element ui用于前端样式
  - vue-pdf用于预览pdf
  - vue-simple-uploader用于上传文件
  - vue-video-player用于预览视频和音乐
