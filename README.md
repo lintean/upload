@@ -1,5 +1,11 @@
 # upload
 
+##主要用到的东西
+ - element ui用于前端框架
+ - vue-pdf用于预览pdf
+ - vue-simple-uploader用于上传文件
+ - vue-video-player用于预览视频和音乐
+
 ## Project setup
 ```
 npm install
