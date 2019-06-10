@@ -1,6 +1,6 @@
 <template>
 	<div id="app">
-		<el-container>
+		<el-container v-if="!phone">
 			<el-header style="height:50px">
 
 				<el-button style="font-size: 18px; color: #303133; float: right; margin-left: 20px; margin-right: 80px;" type="text"
@@ -9,7 +9,8 @@
 				<div class="divider" style="margin-top: 10px; float: right; width: 80%;"></div>
 
 			</el-header>
-			<el-container>
+
+			<el-container v-if="!showDoc">
 				<el-aside>
 					<el-card shadow="always" class="sidebar">
 						<el-button type="primary" style="margin: 10px 0;">新建文档</el-button>
@@ -51,9 +52,9 @@
 							<div style="display: flex; justify-content: flex-start; margin: 10px 0;">
 								<el-card v-for="(file, index) in fileList" :key="index" shadow="always" :body-style="{ padding: '0px'}" style="width: 250px; height: 260px; margin-left: 10px;">
 									<el-image :src="file.fileImgUrl" fit="scale-down" alt="fileImage" class="image"></el-image>
-									
+
 									<div class="divider" style="margin: 0 0 5px 0;"></div>
-									
+
 									<div style="height: 50px; line-height: 50px;">
 										<span style="font-size: 14px; height: 50px; line-height: 50px;">{{file.fileName}}</span>
 										<el-dropdown @command="handleCommand" style="float: right; right: 10px;">
@@ -107,6 +108,59 @@
 				</el-main>
 			</el-container>
 
+			<el-main v-if="showDoc">
+				<div style="margin-bottom: 10px; height: 50px;">
+					<div style="float: left">
+						<el-button type="primary" style="position: relative;">新建文档</el-button>
+						<el-button>新建文件夹</el-button>
+						<el-button-group style="margin-left: 10px;">
+							<el-button>下载</el-button>
+							<el-button>重命名</el-button>
+							<el-button>删除</el-button>
+						</el-button-group>
+					</div>
+
+					<el-select v-model="value" multiple filterable allow-create default-first-option placeholder="搜索你的资源" style="float: right;">
+						<el-option v-for="item in option" :key="item.value" :label="item.label" :value="item.value">
+						</el-option>
+					</el-select>
+				</div>
+				<div class="light_divider"></div>
+				<div style="display: flex; justify-content: flex-start; margin: 10px 0;">
+					<el-card v-for="(doc, index) in docList" :key="index" shadow="always" :body-style="{ padding: '0px'}" style="width: 250px; height: 260px; margin-left: 10px;">
+						<el-image :src="!doc.isDoc ? 'http://localhost/docCnt.png' : 'http://localhost/doc.png'" fit="scale-down" alt="fileImage" class="image"></el-image>
+
+						<div class="divider" style="margin: 0 0 5px 0;"></div>
+
+						<div style="height: 50px; line-height: 50px;">
+							<span style="font-size: 14px; height: 50px; line-height: 50px;">{{doc.docName}}</span>
+						</div>
+					</el-card>
+				</div>
+			</el-main>
+		</el-container>
+
+		<el-container v-if="phone">
+			<el-header>
+				<el-button type="primary" plain>文档</el-button>
+				<el-button plain>上传</el-button>
+			</el-header>
+			<el-main>
+				<el-card v-for="(file, index) in fileList" :key="index" shadow="always" style="display: flex; justify-content: space-between; line-height: 100px;">
+					<el-image :src="file.fileImgUrl" fit="scale-down" alt="fileImage" style="height:100px; width:100px; margin-right:50px;"></el-image>
+					<span>{{file.fileName}}</span>
+					<el-dropdown>
+						<span class="el-dropdown-link">
+							<i class="el-icon-arrow-down"></i>
+						</span>
+						<el-dropdown-menu slot="dropdown">
+							<el-dropdown-item :command="[index,0]">预览</el-dropdown-item>
+							<el-dropdown-item :command="[index,1]">删除</el-dropdown-item>
+							<el-dropdown-item :command="[index,2]">下载</el-dropdown-item>
+						</el-dropdown-menu>
+					</el-dropdown>
+				</el-card>
+			</el-main>
 		</el-container>
 
 
@@ -114,7 +168,8 @@
 			<ShowPdf :src="PdfOnShow" :page-count="count" style="height:auto; width: 100%; margin: 0 auto;"></ShowPdf>
 		</el-dialog>
 
-		<el-dialog :before-close="stateChange" :visible.sync="VideoVisible" width="80%" style="overflow-x: hidden;" :show-close="false">
+		<el-dialog :before-close="stateChange" :visible.sync="VideoVisible" width="80%" style="overflow-x: hidden;"
+		 :show-close="false">
 			<Video :src="VideoOnShow" :state="state" style="height:auto; width: 100%;"></Video>
 		</el-dialog>
 	</div>
@@ -128,6 +183,10 @@
 		name: 'app',
 		data() {
 			return {
+				// 手机端
+				phone: false,
+				// pc文档界面
+				showDoc: true,
 				count: 7,
 				state: 1,
 				doc: false,
@@ -180,17 +239,20 @@
 				docList: [{
 						docName: "智慧城市",
 						docIcon: "primary",
-						docAuthor: "lintean"
+						docAuthor: "lintean",
+						isDoc: false
 					},
 					{
 						docName: "AuthProxy",
 						docIcon: "success",
-						docAuthor: "xinsane"
+						docAuthor: "xinsane",
+						isDoc: true
 					},
 					{
 						docName: "WebIDE",
 						docIcon: "warning",
-						docAuthor: "koado"
+						docAuthor: "koado",
+						isDoc: true
 					}
 				]
 			}
@@ -271,6 +333,15 @@
 
 	.divider {
 		background-color: #DCDFE6;
+		position: relative;
+		display: block;
+		height: 1px;
+		width: 100%;
+		margin: 0 0 12px 0;
+	}
+
+	.light_divider {
+		background-color: rgba(220, 223, 230, 0.3);
 		position: relative;
 		display: block;
 		height: 1px;
