@@ -1,12 +1,11 @@
 <template>
 	<div id="app">
 		<el-container v-if="!phone">
-			<el-header style="height:50px">
+			<el-header style="height:50px; box-shadow: 0px 10px 6px 0 rgba(0,0,0,.05);">
 
 				<el-button style="font-size: 18px; color: #303133; float: right; margin-left: 20px; margin-right: 80px;" type="text"
 				 icon="el-icon-switch-button">退出</el-button>
 				<el-button style="font-size: 18px; color: #303133; float: right;" type="text" icon="el-icon-user-solid">lintean</el-button>
-				<div class="divider" style="margin-top: 10px; float: right; width: 80%;"></div>
 
 			</el-header>
 
@@ -34,13 +33,16 @@
 						</el-row>
 					</el-card>
 				</el-aside>
+
 				<el-main style="padding-top: 0;" v-if="!doc">
-					<div style="text-align: left; height=30px; line-height: 30px;">
-						<h2 style="display: inline-block; text-align: left; margin-left: 50px; margin-right: 20px;">智慧城市</h2>
+					<div style="text-align: left; height=70px; line-height: 70px;">
+						<h2 style="display: inline-block; text-align: left; margin: 0 20px 0 50px;">智慧城市</h2>
 						<time>2018年9月4日</time>
 						<span style="color: #909399; margin-left: 10px;">由lintean创建</span>
-						<el-button type="primary" style="margin-left: 343px;" @click="doc = !doc">编辑文档</el-button>
-						<el-button type="danger" style="margin-left: 10px;">删除文档</el-button>
+						<div style="float:right">
+							<el-button type="primary" @click="doc = !doc">编辑文档</el-button>
+							<el-button type="danger">删除文档</el-button>
+						</div>
 					</div>
 
 					<div class="divider"></div>
@@ -128,7 +130,8 @@
 				<div class="light_divider"></div>
 				<div style="display: flex; justify-content: flex-start; margin: 10px 0;">
 					<el-card v-for="(doc, index) in docList" :key="index" shadow="always" :body-style="{ padding: '0px'}" style="width: 250px; height: 260px; margin-left: 10px;">
-						<el-image :src="!doc.isDoc ? 'http://localhost/docCnt.png' : 'http://localhost/doc.png'" fit="scale-down" alt="fileImage" class="image"></el-image>
+						<el-image :src="!doc.isDoc ? 'http://localhost/docCnt.png' : 'http://localhost/doc.png'" fit="scale-down" alt="fileImage"
+						 class="image"></el-image>
 
 						<div class="divider" style="margin: 0 0 5px 0;"></div>
 
@@ -141,15 +144,49 @@
 		</el-container>
 
 		<el-container v-if="phone">
-			<el-header>
-				<el-button type="primary" plain>文档</el-button>
-				<el-button plain>上传</el-button>
+			<el-header style="height:50px; box-shadow: 0px 10px 6px 0 rgba(0,0,0,.05);">
+				<el-button style="font-size: 18px; color: #303133; float: right; margin-left: 10px; margin-right: 10px;" type="text"
+				 icon="el-icon-switch-button">退出</el-button>
+				<el-button style="font-size: 18px; color: #303133; float: right;" type="text" icon="el-icon-user-solid">lintean</el-button>
 			</el-header>
-			<el-main>
-				<el-card v-for="(file, index) in fileList" :key="index" shadow="always" style="display: flex; justify-content: space-between; line-height: 100px;">
-					<el-image :src="file.fileImgUrl" fit="scale-down" alt="fileImage" style="height:100px; width:100px; margin-right:50px;"></el-image>
-					<span>{{file.fileName}}</span>
-					<el-dropdown>
+
+			<el-main v-if="showDoc">
+				<div>
+					<el-button type="primary" plain>新建</el-button>
+					<el-button plain>搜索</el-button>
+				</div>
+				<div class="divider" style="margin-top: 10px;"></div>
+
+				<el-card v-for="(file, index) in fileList" :key="index" shadow="always" :body-style="{ padding: '0px'}" style="line-height: 100px; padding: 0; margin-top: 10px;">
+					<el-image :src="file.fileImgUrl" fit="scale-down" alt="fileImage" style="height:100px; width:100px; float: left;"></el-image>
+					<span class="phoneText" :style="'max-width :' + phoneTextWt + 'px'">
+						{{file.fileName}}</span>
+					<el-dropdown style="float: right; margin-right: 10px">
+						<span class="el-dropdown-link">
+							<i class="el-icon-arrow-down"></i>
+						</span>
+						<el-dropdown-menu slot="dropdown">
+							<el-dropdown-item :command="[index,0]">下载</el-dropdown-item>
+							<el-dropdown-item :command="[index,1]">重命名</el-dropdown-item>
+							<el-dropdown-item :command="[index,2]">删除</el-dropdown-item>
+						</el-dropdown-menu>
+					</el-dropdown>
+				</el-card>
+			</el-main>
+
+			<el-main ref="phoneCnt" v-if="!showDoc">
+				<div>
+					<el-button type="primary" plain>目录</el-button>
+					<el-button plain>上传</el-button>
+					<el-button plain @click="doc = !doc">编辑</el-button>
+				</div>
+				<div class="divider" style="margin-top: 10px;"></div>
+
+				<el-card v-if="!doc" v-for="(file, index) in fileList" :key="index" shadow="always" :body-style="{ padding: '0px'}" style="line-height: 100px; padding: 0; margin-top: 10px;">
+					<el-image :src="file.fileImgUrl" fit="scale-down" alt="fileImage" style="height:100px; width:100px; float: left;"></el-image>
+					<span class="phoneText" :style="'max-width :' + phoneTextWt + 'px'">
+						{{file.fileName}}</span>
+					<el-dropdown style="float: right; margin-right: 10px">
 						<span class="el-dropdown-link">
 							<i class="el-icon-arrow-down"></i>
 						</span>
@@ -160,6 +197,30 @@
 						</el-dropdown-menu>
 					</el-dropdown>
 				</el-card>
+
+				<div v-if="doc">
+					<el-row style="margin-top: 10px;">
+						<el-col :offset="1" :span="3">标题</el-col>
+						<el-col :offset="2" :span="18">
+							<el-input type="text" placeholder="文档的性质或类型" maxlength="10" show-word-limit>
+							</el-input>
+						</el-col>
+					</el-row>
+					<el-row style="margin-top: 10px;">
+						<el-col :offset="1" :span="3">介绍</el-col>
+						<el-col :offset="2" :span="18">
+							<el-input type="textarea" placeholder="文档的简介" maxlength="150" show-word-limit rows="10">
+							</el-input>
+						</el-col>
+					</el-row>
+					<el-row style="margin-top: 10px;">
+						<el-col :offset="1" :span="3">标签</el-col>
+						<el-col :offset="2" :span="18">
+							<el-input type="text" placeholder="请输入一个标签" maxlength="10" show-word-limit>
+							</el-input>
+						</el-col>
+					</el-row>
+				</div>
 			</el-main>
 		</el-container>
 
@@ -184,9 +245,10 @@
 		data() {
 			return {
 				// 手机端
-				phone: false,
+				phone: true,
+				phoneTextWt: 170,
 				// pc文档界面
-				showDoc: true,
+				showDoc: false,
 				count: 7,
 				state: 1,
 				doc: false,
@@ -261,6 +323,14 @@
 			ShowPdf,
 			Video
 		},
+		mounted: function() {
+			// 判断是否是手机访问
+			this.phone = this.isPhone();
+			// 移动端获取容器宽度
+			if (this.phone) {
+				this.phoneTextWt = document.documentElement.clientWidth - 200;
+			}
+		},
 		methods: {
 			handleCommand(command) {
 				console.log('click on item ' + command[0] + command[1]);
@@ -316,6 +386,12 @@
 				this.state = 1 - this.state;
 				this.VideoOnShow = "";
 				done();
+			},
+			isPhone() {
+				let flag = navigator.userAgent.match(
+					/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i
+				)
+				return flag;
 			}
 		}
 	}
@@ -375,6 +451,14 @@
 		overflow-y: auto;
 	}
 
+	.phoneText {
+		float: left;
+		margin-left: 30px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
 	.image {
 		width: 202.5px;
 		height: 202.5px;
@@ -384,6 +468,7 @@
 	body {
 		position: relative;
 		height: 80%;
+		margin: 0;
 	}
 
 	html {
