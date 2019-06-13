@@ -1,18 +1,19 @@
 <template>
 	<div id="app">
 		<el-container v-if="!phone">
-			<el-header style="height:50px; box-shadow: 0px 10px 6px 0 rgba(0,0,0,.05);">
+			<el-header style="height:60px; line-height: 60px; box-shadow: 0px 10px 6px 0 rgba(0,0,0,.05);">
+				<el-image :src="require('./assets/logo.png')" style="height: 50px; width: 240px; padding: 5px 0; float: left;"></el-image>
 
-				<el-button style="font-size: 18px; color: #303133; float: right; margin-left: 20px; margin-right: 80px;" type="text"
-				 icon="el-icon-switch-button">退出</el-button>
-				<el-button style="font-size: 18px; color: #303133; float: right;" type="text" icon="el-icon-user-solid">lintean</el-button>
-
+				<div style="float: right; ">
+					<el-button style="font-size: 18px; color: #303133;" type="text" icon="el-icon-user-solid" @click="loginData.visible = true">lintean</el-button>
+					<el-button style="font-size: 18px; color: #303133;" type="text" icon="el-icon-switch-button" @click="registerData.visible = true">退出</el-button>
+				</div>
 			</el-header>
 
 			<el-container v-if="!showDoc">
 				<el-aside>
 					<el-card shadow="always" class="sidebar">
-						<el-button type="primary" style="margin: 10px 0;">新建文档</el-button>
+						<el-button type="primary" style="margin: 10px 0;" @click="doc = !doc">新建文档</el-button>
 						<el-select v-model="value" multiple filterable allow-create default-first-option placeholder="请输入文档名或标签">
 							<el-option v-for="item in option" :key="item.value" :label="item.label" :value="item.value">
 							</el-option>
@@ -80,10 +81,13 @@
 				</el-main>
 
 				<el-main style="padding-top: 0;" v-if="doc">
-					<div style="text-align: left; height=30px; line-height: 30px;">
-						<h2 style="display: inline-block; text-align: left; margin-left: 50px; margin-right: 20px;">主要元数据</h2>
+					<div style="text-align: left; height=70px; line-height: 70px;">
+						<h2 style="display: inline-block; text-align: left; margin: 0 20px 0 50px;">主要元数据</h2>
 						<span style="color: #909399; margin-left: 10px;">lintean正在编辑</span>
-						<el-button type="primary" style="margin-left: 520px;" @click="doc = !doc">保存文档</el-button>
+						<div style="float:right">
+							<el-button type="primary" @click="doc = !doc">保存文档</el-button>
+							<el-button @click="doc = !doc">取消编辑</el-button>
+						</div>
 					</div>
 
 					<div class="divider"></div>
@@ -115,7 +119,7 @@
 			<el-main v-if="showDoc">
 				<div style="margin-bottom: 10px; height: 50px;">
 					<div style="float: left">
-						<el-button type="primary" style="position: relative;" @click="showDoc = !showDoc">新建文档</el-button>
+						<el-button type="primary" style="position: relative;" @click="doc = !doc">新建文档</el-button>
 						<el-button>新建文件夹</el-button>
 						<el-button-group style="margin-left: 10px;">
 							<el-button>下载</el-button>
@@ -132,13 +136,13 @@
 				<div class="light_divider"></div>
 				<div style="display: flex; justify-content: flex-start; margin: 10px 0;">
 					<el-card v-for="(doc, index) in docList" :key="index" shadow="always" :body-style="{ padding: '0px'}" style="width: 250px; height: 260px; margin-left: 10px;">
-						<el-image :src="!doc.isDoc ? 'http://localhost/docCnt.png' : 'http://localhost/doc.png'" fit="scale-down" alt="fileImage"
-						 class="image"></el-image>
+						<el-image :src="!doc.isDoc ? require('./assets/images/docCnt.png') : require('./assets/images/doc.png')" fit="scale-down"
+						 alt="fileImage" class="image"></el-image>
 
 						<div class="divider" style="margin: 0 0 5px 0;"></div>
 
 						<div style="height: 50px; line-height: 50px;">
-							<span style="font-size: 14px; height: 50px; line-height: 50px;">{{doc.docName}}</span>
+							<span style="font-size: 14px; height: 50px; line-height: 50px;" @click="showDoc = false">{{doc.docName}}</span>
 						</div>
 					</el-card>
 				</div>
@@ -146,23 +150,34 @@
 		</el-container>
 
 		<el-container v-if="phone">
-			<el-header style="height:50px; box-shadow: 0px 10px 6px 0 rgba(0,0,0,.05);">
-				<el-button style="font-size: 18px; color: #303133; float: right; margin-left: 10px; margin-right: 10px;" type="text"
-				 icon="el-icon-switch-button">退出</el-button>
-				<el-button style="font-size: 18px; color: #303133; float: right;" type="text" icon="el-icon-user-solid">lintean</el-button>
+			<el-header style="height:60px; line-height: 60px; box-shadow: 0px 10px 6px 0 rgba(0,0,0,.05);">
+				<el-image :src="require('./assets/logo.png')" style="height: 30px; width: 145px; padding: 15px 0 15px 0; float: left;"></el-image>
+
+				<el-dropdown style="float: right;">
+					<span style="display: inline-block; font-size: 18px;">
+						<i class="el-icon-user-solid"></i>
+						lintean
+					</span>
+
+					<el-dropdown-menu slot="dropdown">
+						<el-dropdown-item :command="0">账户</el-dropdown-item>
+						<el-dropdown-item :command="1">退出</el-dropdown-item>
+					</el-dropdown-menu>
+				</el-dropdown>
 			</el-header>
 
 			<el-main v-if="showDoc">
 				<div>
-					<el-button type="primary" plain>新建</el-button>
+					<el-button type="primary" plain @click="showDoc = false; doc = true;">新建</el-button>
 					<el-button plain>搜索</el-button>
 				</div>
 				<div class="divider" style="margin-top: 10px;"></div>
 
-				<el-card v-for="(file, index) in fileList" :key="index" shadow="always" :body-style="{ padding: '0px'}" style="line-height: 100px; padding: 0; margin-top: 10px;">
-					<el-image :src="file.fileImgUrl" fit="scale-down" alt="fileImage" style="height:100px; width:100px; float: left;"></el-image>
-					<span class="phoneText" :style="'max-width :' + phoneTextWt + 'px'">
-						{{file.fileName}}</span>
+				<el-card v-for="(doc, index) in docList" :key="index" shadow="always" :body-style="{ padding: '0px'}" style="line-height: 100px; padding: 0; margin-top: 10px;">
+					<el-image :src="!doc.isDoc ? require('./assets/images/docCnt.png') : require('./assets/images/doc.png')" fit="scale-down"
+					 alt="fileImage" style="height:80px; width:80px; float: left; padding: 10px;"></el-image>
+					<span class="phoneText" :style="'max-width :' + phoneTextWt + 'px'" @click="showDoc = false">
+						{{doc.docName}}</span>
 					<el-dropdown style="float: right; margin-right: 10px">
 						<span class="el-dropdown-link">
 							<i class="el-icon-arrow-down"></i>
@@ -186,7 +201,7 @@
 
 				<div v-if="!doc">
 					<el-card v-for="(file, index) in fileList" :key="index" shadow="always" :body-style="{ padding: '0px'}" style="line-height: 100px; padding: 0; margin-top: 10px;">
-						<el-image :src="file.fileImgUrl" fit="scale-down" alt="fileImage" style="height:100px; width:100px; float: left;"></el-image>
+						<el-image :src="file.fileImgUrl" fit="scale-down" alt="fileImage" style="height:80px; width:80px; float: left; padding: 10px;"></el-image>
 						<span class="phoneText" :style="'max-width :' + phoneTextWt + 'px'">
 							{{file.fileName}}</span>
 						<el-dropdown style="float: right; margin-right: 10px">
@@ -224,6 +239,10 @@
 							</el-input>
 						</el-col>
 					</el-row>
+					<el-row style="margin-top: 10px;">
+						<el-button type="primary" @click="doc = false">保存</el-button>
+						<el-button @click="doc = false">取消</el-button>
+					</el-row>
 				</div>
 			</el-main>
 		</el-container>
@@ -237,6 +256,42 @@
 		 :show-close="false">
 			<Video :src="VideoOnShow" :state="state" style="height:auto; width: 100%;"></Video>
 		</el-dialog>
+
+		<el-dialog title="登陆" :visible.sync="loginData.visible" width="400px" style="text-align: left;" >
+			<el-image :src="require('./assets/logo.png')" style="height:40px; width: 193px; margin: 0 auto; display: block;"></el-image>
+			<el-form label-position="right" label-width="80px" style="margin-right: 50px; margin-top: 30px" :model="loginData" :rules="loginData.rules">
+				<el-form-item label="用户" prop="user">
+					<el-input v-model="loginData.user"></el-input>
+				</el-form-item>
+				<el-form-item label="密码" prop="pwd">
+					<el-input v-model="loginData.pwd"></el-input>
+				</el-form-item>
+			</el-form>
+			<div slot="footer" class="dialog-footer">
+				<el-button @click="loginData.visible = false">取 消</el-button>
+				<el-button type="primary" @click="loginData.visible = false">确 定</el-button>
+			</div>
+		</el-dialog>
+
+		<el-dialog title="注册" :visible.sync="registerData.visible" width="400px" style="text-align: left;">
+			<el-image :src="require('./assets/logo.png')" style="height:40px; width: 193px; margin: 0 auto; display: block;"></el-image>
+			<el-form label-position="right" label-width="80px" style="margin-right: 50px; margin-top: 30px" :model="registerData" :rules="registerData.rules">
+				<el-form-item label="用户" prop="user">
+					<el-input v-model="registerData.user"></el-input>
+				</el-form-item>
+				<el-form-item label="密码" prop="pwd">
+					<el-input v-model="registerData.pwd"></el-input>
+				</el-form-item>
+				<el-form-item label="确认" prop="pwdRp">
+					<el-input v-model="registerData.pwdRp"></el-input>
+				</el-form-item>
+			</el-form>
+			<div slot="footer" class="dialog-footer">
+				<el-button @click="registerData.visible = false">取 消</el-button>
+				<el-button type="primary" @click="registerData.visible = false">确 定</el-button>
+			</div>
+		</el-dialog>
+
 	</div>
 </template>
 
@@ -267,25 +322,25 @@
 				},
 				fileList: [{
 						fileName: "排课示例视频.mp4",
-						fileImgUrl: "http://localhost/1.png",
+						fileImgUrl: require("./assets/images/1.png"),
 						fileUrl: "http://localhost/1.mp4",
 						fileType: 0
 					},
 					{
 						fileName: "let it go.mp3",
-						fileImgUrl: "http://localhost/2.png",
+						fileImgUrl: require("./assets/images/2.png"),
 						fileUrl: "http://localhost/1.mp3",
 						fileType: 0
 					},
 					{
 						fileName: "安卓屏幕适配.pdf",
-						fileImgUrl: "http://localhost/3.png",
+						fileImgUrl: require("./assets/images/3.png"),
 						fileUrl: "http://localhost/1.pdf",
 						fileType: 1
 					},
 					{
 						fileName: "其他文件",
-						fileImgUrl: "http://localhost/4.png",
+						fileImgUrl: require("./assets/images/4.png"),
 						fileUrl: "",
 						fileType: 2
 					}
@@ -320,7 +375,47 @@
 						docAuthor: "koado",
 						isDoc: true
 					}
-				]
+				],
+				loginData: {
+					visible: false,
+					user: "",
+					pwd: "",
+					rules: {
+						user: [{
+							required: true,
+							message: '请输入用户名',
+							trigger: 'blur'
+						}],
+						pwd: [{
+							required: true,
+							message: '请输入密码',
+							trigger: 'blur'
+						}]
+					}
+				},
+				registerData: {
+					visible: false,
+					user: "",
+					pwd: "",
+					pwdRp: "",
+					rules: {
+						user: [{
+							required: true,
+							message: '请输入用户名',
+							trigger: 'blur'
+						}],
+						pwd: [{
+							required: true,
+							message: '请输入密码',
+							trigger: 'blur'
+						}],
+						pwdRp: [{
+							required: true,
+							message: '请确认密码',
+							trigger: 'blur'
+						}]
+					}
+				}
 			}
 		},
 		components: {
@@ -408,7 +503,6 @@
 		-moz-osx-font-smoothing: grayscale;
 		text-align: center;
 		color: #2c3e50;
-		margin-top: 10px;
 	}
 
 	.divider {
