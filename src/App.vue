@@ -36,7 +36,8 @@
 
 				<el-main style="padding-top: 0;" v-if="!doc">
 					<div style="text-align: left; height=70px; line-height: 70px;">
-						<h2 style="display: inline-block; text-align: left; margin: 0 20px 0 50px;">智慧城市</h2>
+						<el-button @click="showDoc = !showDoc" type="info" style="margin: auto 0 auto 40px;" icon="el-icon-back" circle></el-button>
+						<h2 style="display: inline-block; text-align: left; margin: 0 20px 0 20px;">智慧城市</h2>
 						<time>2018年9月4日</time>
 						<span style="color: #909399; margin-left: 10px;">由lintean创建</span>
 						<div style="float:right">
@@ -77,6 +78,7 @@
 						<uploader-list></uploader-list>
 					</uploader>
 				</el-main>
+
 				<el-main style="padding-top: 0;" v-if="doc">
 					<div style="text-align: left; height=30px; line-height: 30px;">
 						<h2 style="display: inline-block; text-align: left; margin-left: 50px; margin-right: 20px;">主要元数据</h2>
@@ -113,7 +115,7 @@
 			<el-main v-if="showDoc">
 				<div style="margin-bottom: 10px; height: 50px;">
 					<div style="float: left">
-						<el-button type="primary" style="position: relative;">新建文档</el-button>
+						<el-button type="primary" style="position: relative;" @click="showDoc = !showDoc">新建文档</el-button>
 						<el-button>新建文件夹</el-button>
 						<el-button-group style="margin-left: 10px;">
 							<el-button>下载</el-button>
@@ -176,27 +178,29 @@
 
 			<el-main ref="phoneCnt" v-if="!showDoc">
 				<div>
-					<el-button type="primary" plain>目录</el-button>
+					<el-button type="primary" @click="showDoc = !showDoc" plain>返回</el-button>
 					<el-button plain>上传</el-button>
 					<el-button plain @click="doc = !doc">编辑</el-button>
 				</div>
 				<div class="divider" style="margin-top: 10px;"></div>
 
-				<el-card v-if="!doc" v-for="(file, index) in fileList" :key="index" shadow="always" :body-style="{ padding: '0px'}" style="line-height: 100px; padding: 0; margin-top: 10px;">
-					<el-image :src="file.fileImgUrl" fit="scale-down" alt="fileImage" style="height:100px; width:100px; float: left;"></el-image>
-					<span class="phoneText" :style="'max-width :' + phoneTextWt + 'px'">
-						{{file.fileName}}</span>
-					<el-dropdown style="float: right; margin-right: 10px">
-						<span class="el-dropdown-link">
-							<i class="el-icon-arrow-down"></i>
-						</span>
-						<el-dropdown-menu slot="dropdown">
-							<el-dropdown-item :command="[index,0]">预览</el-dropdown-item>
-							<el-dropdown-item :command="[index,1]">删除</el-dropdown-item>
-							<el-dropdown-item :command="[index,2]">下载</el-dropdown-item>
-						</el-dropdown-menu>
-					</el-dropdown>
-				</el-card>
+				<div v-if="!doc">
+					<el-card v-for="(file, index) in fileList" :key="index" shadow="always" :body-style="{ padding: '0px'}" style="line-height: 100px; padding: 0; margin-top: 10px;">
+						<el-image :src="file.fileImgUrl" fit="scale-down" alt="fileImage" style="height:100px; width:100px; float: left;"></el-image>
+						<span class="phoneText" :style="'max-width :' + phoneTextWt + 'px'">
+							{{file.fileName}}</span>
+						<el-dropdown style="float: right; margin-right: 10px">
+							<span class="el-dropdown-link">
+								<i class="el-icon-arrow-down"></i>
+							</span>
+							<el-dropdown-menu slot="dropdown">
+								<el-dropdown-item :command="[index,0]">预览</el-dropdown-item>
+								<el-dropdown-item :command="[index,1]">删除</el-dropdown-item>
+								<el-dropdown-item :command="[index,2]">下载</el-dropdown-item>
+							</el-dropdown-menu>
+						</el-dropdown>
+					</el-card>
+				</div>
 
 				<div v-if="doc">
 					<el-row style="margin-top: 10px;">
