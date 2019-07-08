@@ -117,14 +117,15 @@
 			</el-container>
 
 			<el-main v-if="showDoc">
-				<div style="margin-bottom: 10px; height: 50px;">
+				<div style="height: 50px;">
 					<div style="float: left">
 						<el-button type="primary" style="position: relative;" @click="doc = !doc">新建文档</el-button>
 						<el-button>新建文件夹</el-button>
 						<el-button-group style="margin-left: 10px;">
-							<el-button>下载</el-button>
 							<el-button>重命名</el-button>
 							<el-button>删除</el-button>
+							<el-button>属性</el-button>
+							<el-button>权限和群组</el-button>
 						</el-button-group>
 					</div>
 
@@ -133,9 +134,14 @@
 						</el-option>
 					</el-select>
 				</div>
+				<div>
+					<el-breadcrumb separator-class="el-icon-arrow-right" class="breadcrumb_route">
+						<el-breadcrumb-item v-for="(document, index) in path" :key="index">{{document.resource_name}}</el-breadcrumb-item>
+					</el-breadcrumb>
+				</div>
 				<div class="light_divider"></div>
 				<div style="display: flex; justify-content: flex-start; margin: 10px 0;">
-					<el-card v-for="(doc, index) in docList" :key="index" shadow="always" :body-style="{ padding: '0px'}" style="width: 250px; height: 260px; margin-left: 10px;">
+					<el-card v-for="(doc, index) in docList" :key="index" shadow="always" :body-style="{ padding: '0px'}" class="document_card">
 						<el-image :src="!doc.isDoc ? require('./assets/images/docCnt.png') : require('./assets/images/doc.png')" fit="scale-down"
 						 alt="fileImage" class="image"></el-image>
 
@@ -257,9 +263,10 @@
 			<Video :src="VideoOnShow" :state="state" style="height:auto; width: 100%;"></Video>
 		</el-dialog>
 
-		<el-dialog title="登陆" :visible.sync="loginData.visible" width="400px" style="text-align: left;" >
+		<el-dialog title="登陆" :visible.sync="loginData.visible" width="400px" style="text-align: left;">
 			<el-image :src="require('./assets/logo.png')" style="height:40px; width: 193px; margin: 0 auto; display: block;"></el-image>
-			<el-form label-position="right" label-width="80px" style="margin-right: 50px; margin-top: 30px" :model="loginData" :rules="loginData.rules">
+			<el-form label-position="right" label-width="80px" style="margin-right: 50px; margin-top: 30px" :model="loginData"
+			 :rules="loginData.rules">
 				<el-form-item label="用户" prop="user">
 					<el-input v-model="loginData.user"></el-input>
 				</el-form-item>
@@ -275,7 +282,8 @@
 
 		<el-dialog title="注册" :visible.sync="registerData.visible" width="400px" style="text-align: left;">
 			<el-image :src="require('./assets/logo.png')" style="height:40px; width: 193px; margin: 0 auto; display: block;"></el-image>
-			<el-form label-position="right" label-width="80px" style="margin-right: 50px; margin-top: 30px" :model="registerData" :rules="registerData.rules">
+			<el-form label-position="right" label-width="80px" style="margin-right: 50px; margin-top: 30px" :model="registerData"
+			 :rules="registerData.rules">
 				<el-form-item label="用户" prop="user">
 					<el-input v-model="registerData.user"></el-input>
 				</el-form-item>
@@ -291,6 +299,44 @@
 				<el-button type="primary" @click="registerData.visible = false">确 定</el-button>
 			</div>
 		</el-dialog>
+
+		<!-- 查看群组 -->
+		<a-drawer title="Multi-level drawer" width=520 :closable="false" @close="onClose" :visible="visible">
+			<!-- 下拉框：操作 -->
+			<!-- 添加群组 -->
+			<!-- 删除群组 -->
+			<!-- 新建群组 -->
+
+			<!-- 分割线 -->
+
+			<!-- 群组列表 含群组名、群组简介、权限选择器、删除button（隐藏）、点击进入群组中的用户 -->
+
+			<!-- 查看群组中的用户 -->
+			<a-drawer title="Two-level Drawer" width=320 :closable="false" @close="onChildrenDrawerClose" :visible="childrenDrawer">
+
+				<el-button>删除群组</el-button>
+				<el-button>编辑信息</el-button>
+				<el-input></el-input>
+				<el-tag></el-tag>
+
+				<!-- 修改群组元数据 -->
+				<a-drawer title="Two-level Drawer" width=320 :closable="false" @close="onChildrenDrawerClose" :visible="childrenDrawer">
+					<el-input></el-input>
+				</a-drawer>
+			</a-drawer>
+
+			<!-- 添加群组 -->
+			<a-drawer title="Two-level Drawer" width=320 :closable="false" @close="onChildrenDrawerClose" :visible="childrenDrawer">
+				<el-input></el-input>
+			</a-drawer>
+
+			<!-- 新建群组 -->
+			<a-drawer title="Two-level Drawer" width=320 :closable="false" @close="onChildrenDrawerClose" :visible="childrenDrawer">
+				<el-input></el-input>
+			</a-drawer>
+
+		</a-drawer>
+
 
 	</div>
 </template>
@@ -415,7 +461,17 @@
 							trigger: 'blur'
 						}]
 					}
-				}
+				},
+				// 当前路径
+				path: [{
+						resource_id: '',
+						resource_name: 'root'
+					},
+					{
+						resource_id: '',
+						resource_name: '当前目录'
+					}
+				]
 			}
 		},
 		components: {
@@ -561,6 +617,29 @@
 		width: 202.5px;
 		height: 202.5px;
 		display: block;
+	}
+
+	.breadcrumb_route {
+		font-weight: bold;
+		cursor: pointer;
+		margin-bottom: 10px;
+		margin-left: 10px;
+	}
+
+	.breadcrumb_route :hover {
+		color: rgb(64, 158, 655);
+	}
+
+	.document_card {
+		width: 250px;
+		height: 260px;
+		margin-left: 10px;
+	}
+
+	.document_card :hover {
+		border: 1px solid #f1f5fa;
+		border-radius: 5px;
+		background: #f1f5fa;
 	}
 
 	body {
