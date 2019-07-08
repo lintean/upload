@@ -5,7 +5,7 @@ export const GET = "get";
 export const POST = "post";
 export const PUT = "put"
 
-export const baseUrl = "http://localhost:31380";
+export const baseUrl = "http://192.168.199.195:8080/v1";
 
 // 用户相关
 export const Login = (user, pwd) => {
@@ -47,35 +47,33 @@ export const getUser = () => {
 // 检索相关
 
 // S1
-export const Logout = (type, keyword, size) => {
+export const Suggestions = (type, keyword, size) => {
 	return new axios({
 		url: baseUrl + '/search/suggestions?type=' + type + '&keyword=' + keyword + '&size=' + size,
-		method: GET,
-		withCredentials: true
+		method: GET
 	})
 };
 
 // S2
-export const Logout = (keyword, tag_count, category_count) => {
+export const Associations = (keyword, tag_count, category_count) => {
 	return new axios({
-		url: baseUrl + '/search/top-associations?keyword=' + keyword + '&tag_count=' + tag_count + '&category_count=' + category_count,
-		method: GET,
-		withCredentials: true
+		url: baseUrl + '/search/associations?keyword=' + keyword + '&tag_count=' + tag_count + '&category_count=' + category_count,
+		method: GET
 	})
 };
 
 // S3
-export const Login = (type, keyword, tags, categories, exts, time_zone, page, per_page) => {
+export const Results = (type, keyword, tags, categories, exts, created_time, modified_time, time_zone, page, per_page) => {
 	return new axios({
 		url: baseUrl + '/search/results',
-		transformRequest: [function(data) { //在请求之前对data传参进行格式转换
-			data = Qs.stringify(data)
-			return data
-		}],
-		headers: {
-			'Content-Type': 'application/x-www-form-urlencoded',
-			'X-Requested-With': 'XMLHttpRequest'
-		},
+// 		transformRequest: [function(data) { //在请求之前对data传参进行格式转换
+// 			data = Qs.stringify(data)
+// 			return data
+// 		}],
+// 		headers: {
+// 			'Content-Type': 'application/json',
+// 			'X-Requested-With': 'XMLHttpRequest'
+// 		},
 		data: {
 			'type': type,
 			'keyword': keyword,
@@ -86,12 +84,25 @@ export const Login = (type, keyword, tags, categories, exts, time_zone, page, pe
 			'page': page,
 			'per_page': per_page
 		},
-		method: POST,
-		withCredentials: true
+		method: POST
 	})
 };
 
-// S4? 含义
+// S4
+export const Tags = (keyword, size) => {
+	return new axios({
+		url: baseUrl + '/search/top-associations?keyword=' + keyword + '&size=' + size,
+		method: GET,
+		withCredentials: true
+	})
+};
+export const Categories = (keyword, size) => {
+	return new axios({
+		url: baseUrl + '/search/top-associations?keyword=' + keyword + '&size=' + size,
+		method: GET,
+		withCredentials: true
+	})
+};
 
 // 管理资源相关
 
