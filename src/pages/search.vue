@@ -20,16 +20,6 @@
 			</el-header>
 			<el-container>
 				<el-main class="cnt_padding">
-					<!-- 					<div class="selection_header">
-						<el-row type="flex">
-							<el-col :span="3">
-								<span class="notication_padding">已选条件</span>
-							</el-col>
-							<el-col :span="21">
-								<el-tag v-for="(option, index) in selectedOptions" :key="index" closable style="margin-left: 5px;" @close="handleClose(tag)">{{option}}</el-tag>
-							</el-col>
-						</el-row>
-					</div> -->
 					<section class="selection_cnt">
 						<el-row type="flex" class="row_bottom_line">
 							<el-col :span="3">

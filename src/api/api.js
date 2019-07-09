@@ -8,41 +8,26 @@ export const PUT = "put"
 export const baseUrl = "http://192.168.199.195:8080/v1";
 
 // 用户相关
-export const Login = (user, pwd) => {
+// U2
+export const Login = (workno, password) => {
 	return new axios({
-		url: baseUrl + '/sso/login/',
-		transformRequest: [function(data) { //在请求之前对data传参进行格式转换
-			data = Qs.stringify(data)
-			return data
-		}],
-		headers: {
-			'Content-Type': 'application/x-www-form-urlencoded',
-			'X-Requested-With': 'XMLHttpRequest'
-		},
+		url: baseUrl + '/v1/login',
 		data: {
-			'username': user,
-			'passwd': pwd
+			'workno': user,
+			'password': password
 		},
-		method: POST,
-		withCredentials: true
+		method: POST
 	})
 };
 
-export const Logout = () => {
-	return new axios({
-		url: baseUrl + '/sso/logout/',
-		method: GET,
-		withCredentials: true
-	})
-};
-
+// U3
 export const getUser = () => {
 	return new axios({
-		url: baseUrl + '/sso/getInfo/',
-		method: GET,
-		withCredentials: true
+		url: baseUrl + ' /v1/users/current',
+		method: GET
 	})
 };
+
 
 // 检索相关
 
@@ -92,19 +77,24 @@ export const Results = (type, keyword, tags, categories, exts, created_time, mod
 export const Tags = (keyword, size) => {
 	return new axios({
 		url: baseUrl + '/search/top-associations?keyword=' + keyword + '&size=' + size,
-		method: GET,
-		withCredentials: true
+		method: GET
 	})
 };
 export const Categories = (keyword, size) => {
 	return new axios({
 		url: baseUrl + '/search/top-associations?keyword=' + keyword + '&size=' + size,
-		method: GET,
-		withCredentials: true
+		method: GET
 	})
 };
 
-// 管理资源相关
+// 目录文档部分相关
+// D5
+export const getResources = (id) => {
+	return new axios({
+		url: baseUrl + '/v1/resources/' + id + '/slaves',
+		method: GET
+	})
+};
 
 // 文件相关
 

@@ -5,8 +5,7 @@
 				<el-image :src="require('./assets/logo.png')" style="height: 50px; width: 240px; padding: 5px 0; float: left;"></el-image>
 
 				<div style="float: right; ">
-					<el-button style="font-size: 18px; color: #303133;" type="text" icon="el-icon-user-solid" @click="loginData.visible = true">lintean</el-button>
-					<el-button style="font-size: 18px; color: #303133;" type="text" icon="el-icon-switch-button" @click="registerData.visible = true">退出</el-button>
+					<el-button style="font-size: 18px; color: #303133;" type="text" icon="el-icon-user-solid" @click="loginData.visible = true">{{loginData.currentUserName}}</el-button>
 				</div>
 			</el-header>
 
@@ -148,7 +147,7 @@
 						<div class="divider" style="margin: 0 0 5px 0;"></div>
 
 						<div style="height: 50px; line-height: 50px;">
-							<span style="font-size: 14px; height: 50px; line-height: 50px;" @click="showDoc = false">{{doc.docName}}</span>
+							<span style="font-size: 14px; height: 50px; line-height: 50px;" @click="showDoc = false">{{doc.resource_name}}</span>
 						</div>
 					</el-card>
 				</div>
@@ -267,7 +266,7 @@
 			<el-image :src="require('./assets/logo.png')" style="height:40px; width: 193px; margin: 0 auto; display: block;"></el-image>
 			<el-form label-position="right" label-width="80px" style="margin-right: 50px; margin-top: 30px" :model="loginData"
 			 :rules="loginData.rules">
-				<el-form-item label="用户" prop="user">
+				<el-form-item label="工号" prop="user">
 					<el-input v-model="loginData.user"></el-input>
 				</el-form-item>
 				<el-form-item label="密码" prop="pwd">
@@ -276,7 +275,7 @@
 			</el-form>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click="loginData.visible = false">取 消</el-button>
-				<el-button type="primary" @click="loginData.visible = false">确 定</el-button>
+				<el-button type="primary" @click="login">确 定</el-button>
 			</div>
 		</el-dialog>
 
@@ -301,7 +300,7 @@
 		</el-dialog>
 
 		<!-- 查看群组 -->
-		<a-drawer title="Multi-level drawer" width=520 :closable="false" @close="onClose" :visible="visible">
+		<a-drawer title="Multi-level drawer" width=520 :closable="false" @close="groupDrawer.groupVisible = false" :visible="groupDrawer.groupVisible">
 			<!-- 下拉框：操作 -->
 			<!-- 添加群组 -->
 			<!-- 删除群组 -->
@@ -312,7 +311,7 @@
 			<!-- 群组列表 含群组名、群组简介、权限选择器、删除button（隐藏）、点击进入群组中的用户 -->
 
 			<!-- 查看群组中的用户 -->
-			<a-drawer title="Two-level Drawer" width=320 :closable="false" @close="onChildrenDrawerClose" :visible="childrenDrawer">
+			<a-drawer title="Two-level Drawer" width=320 :closable="false" @close="groupDrawer.groupUserVisible = false" :visible="groupDrawer.groupUserVisible">
 
 				<el-button>删除群组</el-button>
 				<el-button>编辑信息</el-button>
@@ -320,18 +319,18 @@
 				<el-tag></el-tag>
 
 				<!-- 修改群组元数据 -->
-				<a-drawer title="Two-level Drawer" width=320 :closable="false" @close="onChildrenDrawerClose" :visible="childrenDrawer">
+				<a-drawer title="Two-level Drawer" width=320 :closable="false" @close="groupDrawer.groupMetaVisible = false" :visible="groupDrawer.groupMetaVisible">
 					<el-input></el-input>
 				</a-drawer>
 			</a-drawer>
 
 			<!-- 添加群组 -->
-			<a-drawer title="Two-level Drawer" width=320 :closable="false" @close="onChildrenDrawerClose" :visible="childrenDrawer">
+			<a-drawer title="Two-level Drawer" width=320 :closable="false" @close="groupDrawer.addGroupVisible = false" :visible="groupDrawer.addGroupVisible">
 				<el-input></el-input>
 			</a-drawer>
 
 			<!-- 新建群组 -->
-			<a-drawer title="Two-level Drawer" width=320 :closable="false" @close="onChildrenDrawerClose" :visible="childrenDrawer">
+			<a-drawer title="Two-level Drawer" width=320 :closable="false" @close="groupDrawer.newGroupVisible = false" :visible="groupDrawer.newGroupVisible">
 				<el-input></el-input>
 			</a-drawer>
 
@@ -345,100 +344,65 @@
 	import ShowPdf from './components/ShowPdf.vue'
 	import Video from './components/Video.vue'
 
+	const files = [{
+			fileName: "排课示例视频.mp4",
+			fileImgUrl: require("./assets/images/1.png"),
+			fileUrl: "http://localhost/1.mp4",
+			fileType: 0
+		},
+		{
+			fileName: "let it go.mp3",
+			fileImgUrl: require("./assets/images/2.png"),
+			fileUrl: "http://localhost/1.mp3",
+			fileType: 0
+		},
+		{
+			fileName: "安卓屏幕适配.pdf",
+			fileImgUrl: require("./assets/images/3.png"),
+			fileUrl: "http://localhost/1.pdf",
+			fileType: 1
+		},
+		{
+			fileName: "其他文件",
+			fileImgUrl: require("./assets/images/4.png"),
+			fileUrl: "",
+			fileType: 2
+		}
+	];
+	const docs = [{
+			"resource_id": "573d9b62-9e07-430c-b2a0-4825fbccc785", // 资源id
+			"resource_name": "七月例会", // 资源名称
+			"type": "dir", // 资源类型
+			"creator": "小组长", // 创建者名称
+			"created_at": "2019-07-01 09:21:28", // 创建时间
+			"isOwner": 0,
+			isDoc: false
+		},
+		{
+			"resource_id": "573d9b62-9e07-430c-b2a0-4825fbccc785", // 资源id
+			"resource_name": "七月例会", // 资源名称
+			"type": "dir", // 资源类型
+			"creator": "小组长", // 创建者名称
+			"created_at": "2019-07-01 09:21:28", // 创建时间
+			"isOwner": 0,
+			isDoc: true
+		},
+		{
+			"resource_id": "573d9b62-9e07-430c-b2a0-4825fbccc785", // 资源id
+			"resource_name": "七月例会", // 资源名称
+			"type": "dir", // 资源类型
+			"creator": "小组长", // 创建者名称
+			"created_at": "2019-07-01 09:21:28", // 创建时间
+			"isOwner": 0,
+			isDoc: true
+		}
+	];
+
 	export default {
 		name: 'app',
 		data() {
 			return {
-				// 手机端
-				phone: true,
-				phoneTextWt: 170,
-				// pc文档界面
-				showDoc: false,
-				count: 7,
-				state: 1,
-				doc: false,
-				VideoVisible: false,
-				VideoOnShow: "",
-				PdfVisible: false,
-				PdfOnShow: "",
-				options: {
-					// https://github.com/simple-uploader/Uploader/tree/develop/samples/Node.js
-					target: 'http://localhost/upload.php',
-					testChunks: false
-				},
-				fileList: [{
-						fileName: "排课示例视频.mp4",
-						fileImgUrl: require("./assets/images/1.png"),
-						fileUrl: "http://localhost/1.mp4",
-						fileType: 0
-					},
-					{
-						fileName: "let it go.mp3",
-						fileImgUrl: require("./assets/images/2.png"),
-						fileUrl: "http://localhost/1.mp3",
-						fileType: 0
-					},
-					{
-						fileName: "安卓屏幕适配.pdf",
-						fileImgUrl: require("./assets/images/3.png"),
-						fileUrl: "http://localhost/1.pdf",
-						fileType: 1
-					},
-					{
-						fileName: "其他文件",
-						fileImgUrl: require("./assets/images/4.png"),
-						fileUrl: "",
-						fileType: 2
-					}
-				],
-				// 搜索
-				option: [{
-					value: 'HTML',
-					label: 'HTML'
-				}, {
-					value: 'CSS',
-					label: 'CSS'
-				}, {
-					value: 'JavaScript',
-					label: 'JavaScript'
-				}],
-				value: [],
-				docList: [{
-						docName: "智慧城市",
-						docIcon: "primary",
-						docAuthor: "lintean",
-						isDoc: false
-					},
-					{
-						docName: "AuthProxy",
-						docIcon: "success",
-						docAuthor: "xinsane",
-						isDoc: true
-					},
-					{
-						docName: "WebIDE",
-						docIcon: "warning",
-						docAuthor: "koado",
-						isDoc: true
-					}
-				],
-				loginData: {
-					visible: false,
-					user: "",
-					pwd: "",
-					rules: {
-						user: [{
-							required: true,
-							message: '请输入用户名',
-							trigger: 'blur'
-						}],
-						pwd: [{
-							required: true,
-							message: '请输入密码',
-							trigger: 'blur'
-						}]
-					}
-				},
+				// 注册
 				registerData: {
 					visible: false,
 					user: "",
@@ -462,7 +426,58 @@
 						}]
 					}
 				},
+				// 登陆
+				loginData: {
+					visible: false,
+					isLogin: false,
+					currentUserName: "lintean",
+					currentUserNo: "",
+					currentUserEmail: "",
+					user: "",
+					pwd: "",
+					rules: {
+						user: [{
+							required: true,
+							message: '请输入用户名',
+							trigger: 'blur'
+						}],
+						pwd: [{
+							required: true,
+							message: '请输入密码',
+							trigger: 'blur'
+						}]
+					}
+				},
+				// pc文档界面
+				showDoc: false,
+				count: 7,
+				state: 1,
+				doc: false,
+				VideoVisible: false,
+				VideoOnShow: "",
+				PdfVisible: false,
+				PdfOnShow: "",
+				options: {
+					target: 'http://localhost/upload.php',
+					testChunks: false
+				},
+				// 搜索
+				option: [{
+					value: 'HTML',
+					label: 'HTML'
+				}, {
+					value: 'CSS',
+					label: 'CSS'
+				}, {
+					value: 'JavaScript',
+					label: 'JavaScript'
+				}],
+				value: [],
+
+				// 上部
+
 				// 当前路径
+				// 中部
 				path: [{
 						resource_id: '',
 						resource_name: 'root'
@@ -471,7 +486,30 @@
 						resource_id: '',
 						resource_name: '当前目录'
 					}
-				]
+				],
+				// 下部
+				// 点击交互
+				currentItemClicked: -1,
+
+				fileList: files,
+				docList: docs,
+
+				currentResourceId: "",
+				currentResourceName: "",
+				isCurrentFileLayout: false,
+				
+				// 外部
+				groupDrawer: {
+					groupVisible: false,
+					groupUserVisible: false,
+					groupMetaVisible: false,
+					newGroupVisible: false,
+					addGroupVisible: false
+				},
+
+				// 手机端
+				phone: true,
+				phoneTextWt: 170,
 			}
 		},
 		components: {
@@ -485,6 +523,19 @@
 			if (this.phone) {
 				this.phoneTextWt = document.documentElement.clientWidth - 200;
 			}
+
+			let _this = this;
+			Api.getUser().then(
+				res => {
+					if (res.data.statusCode === 200) {
+						_this.recordLoginData(res);
+						_this.getResources();
+					} else {
+						_this.loginData.visible = true;
+					}
+				}).catch(err => {
+				console.log(err);
+			});
 		},
 		methods: {
 			handleCommand(command) {
@@ -547,6 +598,54 @@
 					/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i
 				)
 				return flag;
+			},
+			recordLoginData(res) {
+				// 登陆信息
+				_this.loginData.currentUserName = res.data.data.userInfo.username;
+				_this.loginData.currentUserNo = res.data.data.userInfo.work_no;
+				_this.loginData.currentUserEmail = res.data.data.userInfo.email;
+
+				// 目录信息
+				_this.currentResourceId = res.data.data.resource_id;
+				_this.currentResourceName = res.data.data.resource_name;
+
+				_this.path = res.data.data.master_dirs;
+				_this.path.push({
+					resource_id: res.data.data.resource_id,
+					resource_name: res.data.data.resource_name,
+				})
+			},
+			login() {
+				let _this = this;
+				Api.Login(this.loginData.user, this.loginData.password).then(
+					res => {
+						if (res.data.statusCode === 200) {
+							_this.recordLoginData(res);
+							_this.loginData.visible = false;
+							_this.getResources();
+						} else {
+							alert(res.data.msg);
+						}
+					}).catch(err => {
+					console.log(err);
+				});
+			},
+			getResources() {
+				let _this = this;
+				Api.getResources(this.currentResourceId).then(
+					res => {
+						if (res.data.statusCode === 200) {
+							for (let i = 0; i < res.data.data.length; ++i) {
+								if (res.data.data.type == "dir") res.data.data.isDoc = false;
+								else res.data.data.isDoc = true;
+							}
+							_this.docList = res.data.data;
+						} else {
+							alert(res.data.msg);
+						}
+					}).catch(err => {
+					console.log(err);
+				});
 			}
 		}
 	}
