@@ -132,7 +132,7 @@
 							<el-button @click="changeNameVisible = true">重命名</el-button>
 							<el-button @click="resourceDelete">删除</el-button>
 							<el-button @click="openMeta">属性</el-button>
-							<el-button>权限和群组</el-button>
+							<el-button @click="getGroupsOfResource">权限和群组</el-button>
 						</el-button-group>
 					</div>
 					<div style="float: left" v-if="isCurrentFileLayout">
@@ -152,19 +152,21 @@
 				</div>
 				<div>
 					<el-breadcrumb separator-class="el-icon-arrow-right" class="breadcrumb_route">
-						<el-breadcrumb-item v-for="(document, index) in path" :key="index" @click="turnToPast(index)">{{document.title}}</el-breadcrumb-item>
+						<el-breadcrumb-item v-for="(document, index) in path" :key="index" @click.native="turnToPast(index)">{{document.title}}</el-breadcrumb-item>
 					</el-breadcrumb>
 				</div>
 				<div class="light_divider"></div>
 				<div style="display: flex; justify-content: flex-start; margin: 10px 0; flex-wrap: wrap;">
-					<el-card v-for="(doc, index) in docList" :key="index" shadow="always" @click.native="itemClicked(index)"
-					 :body-style="{ padding: '0px'}" @dblclick.native="itemDBClicked(index)" :class="currentItemClicked == index? 'document_card item_clicked' : 'document_card'">
+					<el-card v-for="(doc, index) in docList" :key="index" shadow="always" @click.native="clickReady && itemClicked(index)"
+					 :body-style="{ padding: '0px'}" @dblclick.native="clickReady && itemDBClicked(index)" :class="currentItemClicked == index? 'document_card item_clicked' : 'document_card'">
 						<el-image :src="doc.thumbnail" fit="scale-down" alt="fileImage" class="image"></el-image>
 
 						<div class="divider" style="margin: 0 0 5px 0;"></div>
 
 						<div style="height: 50px; line-height: 50px;">
-							<span style="font-size: 14px; height: 50px; line-height: 50px;">{{doc.title}}</span>
+							<span style="font-size: 14px; height: 50px; line-height: 50px;">
+								{{doc.ext != null? doc.title + '.' + doc.ext: doc.title}}
+							</span>
 						</div>
 					</el-card>
 				</div>
@@ -324,7 +326,7 @@
 				<el-dropdown style="position: absolute; top: 10px; right: 10px;" @command="operateGroup">
 					<el-button size="small">操作</el-button>
 					<el-dropdown-menu slot="dropdown">
-						<el-dropdown-item command=0>添加群组</el-dropdown-item>
+						<el-dropdown-item command=0 disabled>添加群组</el-dropdown-item>
 						<el-dropdown-item command=1>删除群组</el-dropdown-item>
 						<el-dropdown-item command=2>新建群组</el-dropdown-item>
 					</el-dropdown-menu>
@@ -333,7 +335,7 @@
 
 			<div style="border-bottom: #e8e8e8 1px solid;">
 				<el-row style="height: 120px; border-top: #e8e8e8 1px solid; cursor: pointer; padding: 10px;" v-for="(group, index) in groupList"
-				 :key="index" @click.native="showGroupUser">
+				 :key="index" @click.native="showGroupUser(index)">
 					<el-col :span="14" style="height: 100px">
 						<h3>{{group.groupInfo.group_name}}</h3>
 						<span style="color:rgba(0, 0, 0, 0.45); text-overflow: ellipsis; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;">
@@ -345,7 +347,7 @@
 					</el-col>
 
 					<el-button v-show="isDeleteScene" plain circle icon="el-icon-close" type="danger" style="position: absolute; right: 0px; top: 2px;"
-					 size="mini" @click="deleteGroup(index)"></el-button>
+					 size="mini" @click.stop="deleteGroup(index)"></el-button>
 				</el-row>
 			</div>
 
@@ -360,7 +362,7 @@
 					<el-dropdown style="position: absolute; top: 10px; right: 10px;" @command="operateGroupMeta">
 						<el-button size="small">操作</el-button>
 						<el-dropdown-menu slot="dropdown">
-							<el-dropdown-item command=0>新增用户</el-dropdown-item>
+							<el-dropdown-item command=0 disabled>新增用户</el-dropdown-item>
 							<el-dropdown-item command=1>删除用户</el-dropdown-item>
 							<el-dropdown-item command=2>编辑信息</el-dropdown-item>
 						</el-dropdown-menu>
@@ -370,7 +372,7 @@
 				<el-row style="margin-top: 10px;">
 					<el-col :offset="1" :span="5" style="text-align: right;">群组名：</el-col>
 					<el-col :offset="2" :span="16">
-						<span>{{docMeta.title}}</span>
+						<span>{{groupList[groupClickedIndex].groupInfo.group_name}}</span>
 					</el-col>
 				</el-row>
 				<!-- 			<el-row style="margin-top: 10px;">
@@ -382,13 +384,13 @@
 				<el-row style="margin-top: 10px;">
 					<el-col :offset="1" :span="5" style="text-align: right;">创建时间：</el-col>
 					<el-col :offset="2" :span="16">
-						<span>{{docMeta.created_time}}</span>
+						<span>{{groupList[groupClickedIndex].groupInfo.created_at}}</span>
 					</el-col>
 				</el-row>
 				<el-row style="margin-top: 10px;">
 					<el-col :offset="1" :span="5" style="text-align: right;">简介：</el-col>
 					<el-col :offset="2" :span="16">
-						<span>{{docMeta.desc}}</span>
+						<span>{{groupList[groupClickedIndex].groupInfo.group_desc}}</span>
 					</el-col>
 				</el-row>
 				<el-row style="margin-top: 10px;">
@@ -404,14 +406,14 @@
 					<el-row style="margin-top: 10px;">
 						<el-col :offset="1" :span="5" style="text-align: right;">群组名：</el-col>
 						<el-col :offset="2" :span="16">
-							<el-input type="text" v-model="fileEditMeta.desc" size="small">
+							<el-input type="text" v-model="groupMeta.group_name" size="small">
 							</el-input>
 						</el-col>
 					</el-row>
 					<el-row style="margin-top: 10px;">
 						<el-col :offset="1" :span="5" style="text-align: right;">简介：</el-col>
 						<el-col :offset="2" :span="16">
-							<el-input type="textarea" :rows="8" show-word-limit v-model="fileEditMeta.desc" size="small">
+							<el-input type="textarea" :rows="8" show-word-limit v-model="groupMeta.group_desc" size="small">
 							</el-input>
 						</el-col>
 					</el-row>
@@ -429,18 +431,18 @@
 			</a-drawer>
 
 			<!-- 新建群组 -->
-			<a-drawer title="新增群组" width=320 :closable="false" @close="groupDrawer.newGroupVisible = false" :visible="groupDrawer.newGroupVisible">
+			<a-drawer title="新增群组" width=320 :closable="false" @close="newGroup" :visible="groupDrawer.newGroupVisible">
 				<el-row style="margin-top: 10px;">
 					<el-col :offset="1" :span="5" style="text-align: right;">群组名：</el-col>
 					<el-col :offset="2" :span="16">
-						<el-input type="text" v-model="fileEditMeta.desc" size="small">
+						<el-input type="text" v-model="groupMeta.group_name" size="small">
 						</el-input>
 					</el-col>
 				</el-row>
 				<el-row style="margin-top: 10px;">
 					<el-col :offset="1" :span="5" style="text-align: right;">简介：</el-col>
 					<el-col :offset="2" :span="16">
-						<el-input type="textarea" :rows="8" show-word-limit v-model="fileEditMeta.desc" size="small">
+						<el-input type="textarea" :rows="8" show-word-limit v-model="groupMeta.group_desc" size="small">
 						</el-input>
 					</el-col>
 				</el-row>
@@ -623,13 +625,23 @@
 			</el-upload>
 		</a-drawer>
 
+		<a :href="downloadUrl" v-show="false" :download="downloadName" ref="downloadLabel" id="downloadLabel"></a>
+
 	</div>
+
 </template>
 
 <script>
 	// 	import ShowPdf from './components/ShowPdf.vue'
 	// 	import Video from './components/Video.vue'
 	import * as Api from './api/api'
+	import * as Download from './util/download'
+	import {
+		saveAs
+	} from 'file-saver';
+
+	// click dblclick 冲突计时器
+	var time = null;
 
 	const files = [{
 			fileName: "排课示例视频.mp4",
@@ -658,25 +670,9 @@
 	];
 	const docs = [{
 			"id": "573d9b62-9e07-430c-b2a0-4825fbccc785", // 资源id
-			"title": "七月例会", // 资源名称
-			"thumbnail": "", //缩略图
+			"title": "返回", // 资源名称
+			"thumbnail": require("./assets/back.png"), //缩略图
 			"resource_type": "doc", // 资源类型
-			"creator": "", // 创建者id
-			"created_time": "2019-07-01 09:21:28" // 创建时间
-		},
-		{
-			"id": "573d9b62-9e07-430c-b2a0-4825fbccc785", // 资源id
-			"title": "七月例会", // 资源名称
-			"thumbnail": "", //缩略图
-			"resource_type": "dir", // 资源类型
-			"creator": "", // 创建者id
-			"created_time": "2019-07-01 09:21:28" // 创建时间
-		},
-		{
-			"id": "573d9b62-9e07-430c-b2a0-4825fbccc785", // 资源id
-			"title": "七月例会", // 资源名称
-			"thumbnail": "", //缩略图
-			"resource_type": "dir", // 资源类型
 			"creator": "", // 创建者id
 			"created_time": "2019-07-01 09:21:28" // 创建时间
 		}
@@ -835,6 +831,7 @@
 					isLogin: false,
 					currentUserName: "lintean",
 					currentUserNo: "",
+					currentUserId: "",
 					currentUserEmail: "",
 					user: "",
 					pwd: "",
@@ -890,7 +887,7 @@
 				currentResourceId: "",
 				clickedResourceId: "",
 				currentResourceName: "",
-				isCurrentFileLayout: true,
+				isCurrentFileLayout: false,
 
 				// 外部
 				// 上传
@@ -947,12 +944,24 @@
 					addUserVisible: false
 				},
 				groupList: gl,
-				isCurrentOwner: 1,
+				isCurrentResourceOwner: 1,
+				isCurrentGroupOwner: 1,
 				permissionMap: pm,
 				isDeleteScene: false,
 				groupUserList: ml,
 				isDeleteGroupUserScene: false,
+				groupMeta: {
+					group_name: "",
+					group_desc: ""
+				},
+				groupClickedIndex: 0,
 
+				// 点击限制
+				clickReady: true,
+
+				// 文件下载
+				downloadUrl: "",
+				downloadName: "",
 
 				// 手机端
 				phone: true,
@@ -977,8 +986,7 @@
 					if (res.data.status === 200) {
 						_this.recordLoginData(res);
 
-						console.log(res);
-						// _this.getResources();
+						_this.itemDBClicked(-1);
 					} else {
 						_this.loginData.visible = true;
 					}
@@ -1083,84 +1091,7 @@
 						if (res.data.status === 200) {
 							_this.recordLoginData(res);
 							_this.loginData.visible = false;
-							_this.getResources();
-						} else {
-							alert(res.data.msg);
-						}
-					}).catch(err => {
-					console.log(err);
-				});
-			},
-			getResources() {
-				let _this = this;
-				Api.getResources(this.clickedResourceId).then(
-					res => {
-
-						if (res.data.status === 200) {
-							if (res.data.data == null) res.data.data = [];
-							console.log(_this.docList);
-
-							let target;
-							let parent_id;
-
-							let parent_name = _this.currentResourceName;
-							let isBack = (_this.currentItemClicked == 0);
-							let isFirst = (_this.currentItemClicked == -1);
-							if (isFirst) target = {
-								id: _this.currentResourceId,
-								title: _this.currentResourceName
-							};
-							else target = _this.docList[_this.currentItemClicked]
-
-							if (isFirst) parent_id = _this.path[_this.path.length - 2].id;
-							else parent_id = _this.currentResourceId;
-
-							// 更新当前目录状态
-							_this.currentResourceId = (_this.currentItemClicked != -1 ? _this.docList[_this.currentItemClicked].id :
-								_this.currentResourceId);
-							if (isBack) _this.currentResourceName = _this.path[_this.path.length - 1].title;
-							else _this.currentResourceName = (_this.currentItemClicked != -1 ? _this.docList[_this.currentItemClicked].title :
-								_this.currentResourceName);
-							_this.isCurrentFileLayout = (_this.currentItemClicked != -1 ? !(_this.docList[_this.currentItemClicked].resource_type ==
-								"dir") : false);
-
-							// 更新资源列表
-							_this.docList.splice(0, _this.docList.length);
-
-							// 更新路径和返回上一级入口
-							if (isBack) {
-								console.log("Back");
-								// 返回上一级
-								_this.path.pop();
-								if (_this.path.length > 1) {
-									_this.docList.push({
-										"title": "返回",
-										"thumbnail": require("./assets/back.png"),
-										"resource_type": "dir",
-										"id": _this.path[_this.path.length - 2].id
-									})
-								}
-							} else {
-								console.log("Front");
-								if (!isFirst) _this.path.push(target);
-								_this.docList.push({
-									"title": "返回",
-									"thumbnail": require("./assets/back.png"),
-									"resource_type": "dir",
-									"id": parent_id
-								})
-							}
-
-							for (let i = 0; i < res.data.data.length; ++i) {
-								if (res.data.data[i].thumbnail == "./assets/images/docCnt.png") res.data.data[i].thumbnail = require(
-									"./assets/images/docCnt.png");
-								if (res.data.data[i].thumbnail == "./assets/images/doc.png") res.data.data[i].thumbnail = require(
-									"./assets/images/doc.png");
-							}
-							_this.docList = _this.docList.concat(res.data.data);
-
-							// 初始化点击
-							_this.currentItemClicked = -1;
+							_this.itemDBClicked(-1);
 						} else {
 							alert(res.data.msg);
 						}
@@ -1169,17 +1100,168 @@
 				});
 			},
 			itemClicked(i) {
-				if (i != this.currentItemClicked) {
-					this.currentItemClicked = i;
-				} else {
-					this.currentItemClicked = -1;
-				}
+				clearTimeout(time); //首先清除计时器
+				time = setTimeout(() => {
+					console.log("单击");
+					if (i != this.currentItemClicked) {
+						this.currentItemClicked = i;
+					} else {
+						this.currentItemClicked = -1;
+					}
+				}, 300); //大概时间300ms
 			},
 			itemDBClicked(index) {
-				console.log(1);
+				if (index != 0 && this.isCurrentFileLayout) return;
+				clearTimeout(time); //清除
+				console.log("双击");
+				this.clickReady = false;
 				this.currentItemClicked = index;
-				this.clickedResourceId = this.docList[index].id;
-				this.getResources();
+
+				// 根据id刷新当前目录
+				if (index == -1) this.refreshResource();
+				// 返回上一级目录
+				else if (this.path.length != 1 && index == 0) this.backToUpper();
+				// 打开点击的目录
+				else this.goToNext();
+			},
+			refreshResource() {
+				let _this = this;
+				Api.getResources(this.currentResourceId).then(
+					res => {
+						if (res.data.status === 200) {
+							if (res.data.data == null) res.data.data = [];
+							// 更新当前目录状态 （不需要更新
+
+							// 更新资源列表
+							_this.docList.splice(0, _this.docList.length);
+
+							console.log(_this.path);
+							// 更新路径和返回上一级入口
+							if (_this.path.length >= 2) {
+								_this.docList.push({
+									"title": "返回",
+									"thumbnail": require("./assets/back.png"),
+									"resource_type": "dir",
+									"id": _this.path[_this.path.length - 2].id
+								})
+							}
+							console.log(_this.path);
+
+							for (let i = 0; i < res.data.data.length; ++i) {
+								if (res.data.data[i].thumbnail == "./assets/images/docCnt.png") res.data.data[i].thumbnail = require(
+									"./assets/images/docCnt.png");
+								if (res.data.data[i].thumbnail == "./assets/images/doc.png") res.data.data[i].thumbnail = require(
+									"./assets/images/doc.png");
+								if (res.data.data[i].thumbnail == null) res.data.data[i].thumbnail = require(
+									"./assets/images/file.png");
+							}
+
+							_this.docList = _this.docList.concat(res.data.data);
+
+							// 初始化点击
+							_this.currentItemClicked = -1;
+							_this.clickReady = true;
+						} else {
+							alert(res.data.msg);
+						}
+					}).catch(err => {
+					console.log(err);
+				});
+			},
+			backToUpper() {
+				let _this = this;
+				Api.getResources(this.docList[this.currentItemClicked].id).then(
+					res => {
+						if (res.data.status === 200) {
+							if (res.data.data == null) res.data.data = [];
+							// 更新当前目录状态
+							_this.currentResourceId = this.docList[this.currentItemClicked].id;
+							_this.currentResourceName = this.docList[this.currentItemClicked].title;
+							_this.isCurrentFileLayout = false;
+
+							// 更新路径和返回上一级入口
+							_this.path.pop();
+
+							// 更新资源列表
+							_this.docList.splice(0, _this.docList.length);
+
+							if (_this.path.length > 1) {
+								_this.docList.push({
+									"title": "返回",
+									"thumbnail": require("./assets/back.png"),
+									"resource_type": "dir",
+									"id": _this.path[_this.path.length - 2].id
+								})
+							}
+
+							for (let i = 0; i < res.data.data.length; ++i) {
+								if (res.data.data[i].thumbnail == "./assets/images/docCnt.png") res.data.data[i].thumbnail = require(
+									"./assets/images/docCnt.png");
+								if (res.data.data[i].thumbnail == "./assets/images/doc.png") res.data.data[i].thumbnail = require(
+									"./assets/images/doc.png");
+								if (res.data.data[i].thumbnail == null) res.data.data[i].thumbnail = require(
+									"./assets/images/file.png");
+							}
+
+							_this.docList = _this.docList.concat(res.data.data);
+
+							// 初始化点击
+							_this.currentItemClicked = -1;
+							_this.clickReady = true;
+						} else {
+							alert(res.data.msg);
+						}
+					}).catch(err => {
+					console.log(err);
+				});
+			},
+			goToNext() {
+				let _this = this;
+				Api.getResources(this.docList[this.currentItemClicked].id).then(
+					res => {
+						if (res.data.status === 200) {
+							if (res.data.data == null) res.data.data = [];
+							let parent_id = _this.currentResourceId;
+
+							// 更新当前目录状态
+							_this.currentResourceId = _this.docList[_this.currentItemClicked].id;
+							_this.currentResourceName = _this.docList[_this.currentItemClicked].title;
+							_this.isCurrentFileLayout = (_this.docList[_this.currentItemClicked].resource_type == "doc");
+
+							// 更新路径和返回上一级入口
+							_this.path.push(_this.docList[_this.currentItemClicked]);
+
+							// 更新资源列表
+							_this.docList.splice(0, _this.docList.length);
+
+
+							_this.docList.push({
+								"title": "返回",
+								"thumbnail": require("./assets/back.png"),
+								"resource_type": "dir",
+								"id": parent_id
+							})
+
+							for (let i = 0; i < res.data.data.length; ++i) {
+								if (res.data.data[i].thumbnail == "./assets/images/docCnt.png") res.data.data[i].thumbnail = require(
+									"./assets/images/docCnt.png");
+								if (res.data.data[i].thumbnail == "./assets/images/doc.png") res.data.data[i].thumbnail = require(
+									"./assets/images/doc.png");
+								if (res.data.data[i].thumbnail == null) res.data.data[i].thumbnail = require(
+									"./assets/images/file.png");
+							}
+
+							_this.docList = _this.docList.concat(res.data.data);
+
+							// 初始化点击
+							_this.currentItemClicked = -1;
+							_this.clickReady = true;
+						} else {
+							alert(res.data.msg);
+						}
+					}).catch(err => {
+					console.log(err);
+				});
 			},
 			// 上传函数
 			afterUpload(response, file, fileList) {
@@ -1191,13 +1273,15 @@
 					'doc_id': _this.currentResourceId,
 					'parentId': '',
 					'ext': _this.fileExtension,
-					'creator': _this.loginData.currentUserNo,
+					'creator': _this.loginData.currentUserId,
 					'size': Math.floor(file.size.toFixed(1))
 				})
 
 				$.ajax({
 					type: 'post',
-					url: 'http://39.108.210.48:8089/v1/files/' + _this.file_id.substring(0, _this.file_id.lastIndexOf(".")),
+					// url: 'http://192.168.43.211:8089/v1/files/' + _this.file_id.substring(0, _this.file_id.lastIndexOf(".")),
+					// url: 'http://39.108.210.48:8089/v1/files/' + _this.file_id.substring(0, _this.file_id.lastIndexOf(".")),
+					url: Api.baseUrl + '/files/' + _this.file_id.substring(0, _this.file_id.lastIndexOf(".")),
 					data: data,
 					contentType: 'application/json',
 					xhrFields: {
@@ -1205,8 +1289,7 @@
 					},
 					crossDomain: true,
 					success: function(datas) {
-						_this.currentItemClicked = -1;
-						_this.getResources();
+						_this.itemDBClicked(-1);
 					}
 				})
 			},
@@ -1225,7 +1308,9 @@
 				})
 				$.ajax({
 					type: 'post',
-					url: 'http://39.108.210.48:8089/v1/files/url',
+					// url: 'http://192.168.43.211:8089/v1/files/url',
+					// url: 'http://39.108.210.48:8089/v1/files/url',
+					url: Api.baseUrl + '/files/url',
 					data: data,
 					async: false,
 					contentType: 'application/json',
@@ -1235,6 +1320,8 @@
 					crossDomain: true,
 					success: function(datas) {
 						_this.url = datas.data.url;
+						_this.loginData.currentUserId = datas.data.creator;
+
 						let strings = _this.url.split('/')
 						_this.objectName = ""
 						for (var i = 4; i < strings.length - 1; i++) {
@@ -1265,16 +1352,58 @@
 				}
 			},
 			downloadFile() {
-				Api.Download(this.docList[this.currentItemClicked]).then(
-					res => {
-						let blob = new Blob([res.data], {
-							type: ""
-						});
-						let obUrl = URL.createObjectURL(blob);
-						window.location.href = obUrl;
-					}).catch(err => {
-					console.log(err);
-				});
+// 				console.log(this.docList[this.currentItemClicked].id);
+// 				Api.Download(this.docList[this.currentItemClicked].id).then(
+// 					res => {
+// 						// 						let blob = new Blob([res.data], {
+// 						// 							type: "application/octet-stream"
+// 						// 						});
+// 						// 						let obUrl = URL.createObjectURL(blob);
+// 						// 						window.location.href = obUrl;
+// 						console.log("print download")
+// 						console.log(res);
+// 						if (res.data.status === 200) {
+// 							// 							Download.download(res.data.data.url, this.docList[this.currentItemClicked].title 
+// 							// 							+ '.' + this.docList[this.currentItemClicked].ext);
+// 							// 							_this.downloadUrl = res.data.data.url;
+// 							// 							_this.downloadName = this.docList[this.currentItemClicked].title +
+// 							// 								'.' + this.docList[this.currentItemClicked].ext
+// 							// 
+// 							// 							const event = new MouseEvent('click', {
+// 							// 								view: window,
+// 							// 								bubbles: true,
+// 							// 								cancelable: true
+// 							// 							});
+// 							// 							document.getElementById("downloadLabel").dispatchEvent(event);
+// 
+// 							var FileSaver = require('file-saver');
+// 							FileSaver.saveAs(res.data.data.url,
+// 								this.docList[this.currentItemClicked].title +
+// 								'.' + this.docList[this.currentItemClicked].ext);
+// 						}
+// 					}).catch(err => {
+// 					console.log(err);
+// 				});
+
+				let _this = this;
+				$.ajax({
+					type: 'get',
+					url: Api.baseUrl + '/files/' + _this.docList[_this.currentItemClicked].id + '/download',
+					data: null,
+					contentType: 'application/json',
+					xhrFields: {
+						withCredentials: true
+					},
+					crossDomain: true,
+					success: function(res) {
+						console.log(_this.docList[_this.currentItemClicked].title +
+							'.' + _this.docList[_this.currentItemClicked].ext);
+						var FileSaver = require('file-saver');
+						FileSaver.saveAs(res.data.url,
+							_this.docList[_this.currentItemClicked].title +
+							'.' + _this.docList[_this.currentItemClicked].ext);
+					}
+				})
 			},
 			// 打开各种meta信息
 			openMeta() {
@@ -1294,6 +1423,7 @@
 					res => {
 						if (res.data.status === 200) {
 							_this.docMeta = _this.docEditMeta;
+							_this.itemDBClicked(-1);
 						} else {
 							alert(res.data.msg);
 						}
@@ -1321,7 +1451,7 @@
 					res => {
 						if (res.data.status === 200) {
 							_this.fileMeta = res.data.data;
-							_this.fileEditMeta = res.data.data;
+							_this.fileEditMeta = JSON.parse(JSON.stringify(res.data.data));
 							_this.getFileCategories();
 							_this.getFileTags();
 						} else {
@@ -1337,10 +1467,9 @@
 				Api.editFileMeta(temp.id, temp.title, temp.desc, temp.categories, temp.tags).then(
 					res => {
 						if (res.data.status === 200) {
-							_this.fileMeta = res.data.data;
-							_this.fileEditMeta = res.data.data;
-							_this.getFileCategories();
-							_this.getFileTags();
+							_this.fileMeta = JSON.parse(JSON.stringify(_this.fileEditMeta));
+							_this.itemDBClicked(-1);
+							_this.fileEditMetaVisible = false;
 						} else {
 							alert(res.data.msg);
 						}
@@ -1380,9 +1509,14 @@
 					res => {
 						if (res.data.status === 200) {
 							let temp = res.data.data;
+							let image;
+							if (temp.thumbnail == './assets/images/doc.png') image = require('./assets/images/doc.png');
+							else if (temp.thumbnail == './assets/images/docCnt.png') image = require('./assets/images/docCnt.png');
+							else if (temp.thumbnail == null) image = require('./assets/images/file.png');
+
 							_this.docList.push({
 								"created_time": temp.created_at,
-								"thumbnail": require(temp.thumbnail),
+								"thumbnail": image,
 								"creator": temp.creator_id,
 								"resource_type": temp.resource_type,
 								"id": temp.resource_id,
@@ -1400,8 +1534,7 @@
 				Api.deleteResources(this.docList[this.currentItemClicked].id).then(
 					res => {
 						if (res.data.status === 200) {
-							_this.currentItemClicked = -1;
-							_this.getResources();
+							_this.itemDBClicked(-1);
 						} else {
 							alert(res.data.msg);
 						}
@@ -1414,8 +1547,7 @@
 				Api.deleteFile(this.docList[this.currentItemClicked].id).then(
 					res => {
 						if (res.data.status === 200) {
-							_this.currentItemClicked = -1;
-							_this.getResources();
+							_this.itemDBClicked(-1);
 						} else {
 							alert(res.data.msg);
 						}
@@ -1435,10 +1567,11 @@
 			},
 			editResources() {
 				let _this = this;
-				Api.editResources(this.docList[this.currentItemClicked].id).then(
+				Api.editResources(this.docList[this.currentItemClicked].id, this.currentName).then(
 					res => {
 						if (res.data.status === 200) {
 							_this.docList[_this.currentItemClicked].title = _this.currentName;
+							_this.itemDBClicked(-1);
 						} else {
 							alert(res.data.msg);
 						}
@@ -1507,16 +1640,19 @@
 				})
 			},
 			turnToPast(index) {
-				let temp = path[index];
+				console.log("面包屑:" + index);
+				console.log(this.path[2]);
+				let temp = this.path[index];
 				// 目录信息
 				this.currentResourceId = temp.id;
 				this.currentResourceName = temp.title;
 
-				for (let i = index + 1; i < path.length; ++i) {
+				for (let i = index + 1; i < this.path.length; ++i) {
 					this.path.pop();
 				}
 
-				this.getResources();
+				console.log(this.path);
+				this.itemDBClicked(-1);
 			},
 			logout() {
 				let _this = this;
@@ -1568,17 +1704,71 @@
 			addGroup() {
 
 			},
-			deleteGroup() {
-
+			deleteGroup(index) {
+				let _this = this;
+				Api.deleteGroup(this.groupList[index].groupInfo.group_id).then(
+					res => {
+						if (res.data.status === 200) {
+							_this.getGroupsOfResource();
+						} else {
+							alert(res.data.msg);
+						}
+					}).catch(err => {
+					console.log(err);
+				});
 			},
 			newGroup() {
-
+				let _this = this;
+				Api.newGroup(this.groupMeta.group_name, this.groupMeta.group_desc).then(
+					res => {
+						if (res.data.status === 200) {
+							_this.$notify({
+								title: '新建成功',
+								message: '你已经新建群组，可以在添加群组中授予其权限',
+								type: 'success'
+							});
+							_this.groupDrawer.newGroupVisible = false;
+						} else {
+							alert(res.data.msg);
+						}
+					}).catch(err => {
+					console.log(err);
+				});
 			},
-			showGroupUser() {
-				this.groupDrawer.groupUserVisible = true;
+			showGroupUser(index) {
+				let _this = this;
+				Api.getUserOfGroup(this.groupList[index].groupInfo.group_id).then(
+					res => {
+						if (res.data.status === 200) {
+							_this.groupClickedIndex = index;
+							_this.groupUserList = res.data.data.memberList;
+							_this.isCurrentGroupOwner = res.data.data.isOwner;
+							this.groupDrawer.groupUserVisible = true;
+						} else {
+							alert(res.data.msg);
+						}
+					}).catch(err => {
+					console.log(err);
+				});
 			},
 			deleteGroupUser(index) {
 				this.groupUserList.splice(index, 1);
+			},
+			getGroupsOfResource() {
+				let _this = this;
+				Api.getGroupOfResourceHadPermission(this.docList[this.currentItemClicked].id).then(
+					res => {
+						if (res.data.status === 200) {
+							// 数组清空
+							_this.isCurrentResourceOwner = res.data.data.isOwner;
+							_this.groupList = res.data.data.groupList;
+							_this.groupDrawer.groupVisible = true;
+						} else {
+							alert(res.data.msg);
+						}
+					}).catch(err => {
+					console.log(err);
+				});
 			}
 		}
 	}
@@ -1667,6 +1857,7 @@
 		width: 202.5px;
 		height: 260px;
 		margin-left: 10px;
+		margin-bottom: 10px;
 		cursor: pointer;
 	}
 

@@ -73,7 +73,7 @@
 									<el-radio v-for="(ct, index) in CTimes" :key="index" :label="index" style="margin-bottom: 10px;">{{ct.key + '(' + ct.doc_count +')'}}</el-radio>
 								</el-radio-group>
 
-								<el-date-picker v-model="CTime" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"
+								<el-date-picker v-show="defaultCTime == CTimes.length - 1" v-model="CTime" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"
 								 format="yyyy 年 MM 月 dd 日" value-format="yyyy-MM-dd">
 								</el-date-picker>
 							</el-col>
@@ -88,7 +88,7 @@
 									<el-radio v-for="(et, index) in ETimes" :key="index" :label="index" style="margin-bottom: 10px;">{{et.key + '(' + et.doc_count +')'}}</el-radio>
 								</el-radio-group>
 
-								<el-date-picker v-model="ETime" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"
+								<el-date-picker v-show="defaultETime == ETimes.length - 1" v-model="ETime" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"
 								 format="yyyy 年 MM 月 dd 日" value-format="yyyy-MM-dd">
 								</el-date-picker>
 							</el-col>
@@ -417,7 +417,12 @@
 				alert("itemClicked");
 			},
 			handleCheckAllChange(value) {
-				this.defaultTypes = (value ? this.types : []);
+				// console.log(value);
+				let temp = [];
+				for (let i = 0; i < this.types.length; ++i){
+					temp.push(this.types[i].key);
+				}
+				this.defaultTypes = (value ? temp : []);
 				this.isIndeterminate = false;
 			},
 			handleCheckedTypesChange(value) {

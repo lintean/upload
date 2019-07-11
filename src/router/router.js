@@ -7,6 +7,8 @@ import Search from '../pages/search'
 Vue.use(Router)
 
 export default new Router({
+// 	mode: "history",
+// 	base: '/tool/',
 	routes: [{
 			path: '/',
 			name: 'app',

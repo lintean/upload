@@ -9,9 +9,9 @@ export const DELETE = "delete"
 
 axios.defaults.withCredentials = true;
 
-// export const baseUrl = "http://192.168.199.195:8080/v1";
-export const baseUrl = "http://192.168.43.211:8080/v1";
-// export const baseUrl = "http://39.108.210.48:8089/v1";
+// export const baseUrl = "http://192.168.43.211:8089/v1";
+// export const baseUrl = "http://192.168.43.211:8080/v1";
+export const baseUrl = "http://39.108.210.48:8089/v1";
 
 // 用户相关
 // U2
@@ -170,7 +170,12 @@ export const editResourceMeta = (doc_id, title, desc) => {
 // F6
 export const deleteFile = (file_id) => {
 	return new axios({
-		url: baseUrl + '/files' + file_id,
+		url: baseUrl + '/files',
+		data: {
+			"file_id": [
+				file_id
+			]
+		},
 		method: DELETE
 	})
 };
@@ -178,7 +183,7 @@ export const deleteFile = (file_id) => {
 // F7
 export const Download = (file_id) => {
 	return new axios({
-		url: baseUrl + '/files/​' + file_id + '/download',
+		url: baseUrl + '/files/' + file_id + '/download?1sdfsdfsdfsdf',
 		method: GET,
 		responseType: 'arraybuffer'
 	})
@@ -187,7 +192,7 @@ export const Download = (file_id) => {
 // F9
 export const getFileMeta = (file_id) => {
 	return new axios({
-		url: baseUrl + '/files/​' + file_id,
+		url: baseUrl + '/files/' + file_id,
 		method: GET
 	})
 };
@@ -195,7 +200,7 @@ export const getFileMeta = (file_id) => {
 // F10
 export const editFileMeta = (file_id, title, desc, categories, tags) => {
 	return new axios({
-		url: baseUrl + '/files/​' + file_id,
+		url: baseUrl + '/files/' + file_id,
 		data: {
 			'title': title,
 			'desc': desc,
@@ -211,14 +216,14 @@ export const editFileMeta = (file_id, title, desc, categories, tags) => {
 // F16
 export const getFileCategories = (file_id) => {
 	return new axios({
-		url: baseUrl + '/files/​' + file_id + '/categories',
+		url: baseUrl + '/files/' + file_id + '/categories',
 		method: GET
 	})
 };
 
 export const getFileTags = (file_id) => {
 	return new axios({
-		url: baseUrl + '/files/​' + file_id + '/tags',
+		url: baseUrl + '/files/' + file_id + '/tags',
 		method: GET
 	})
 };
@@ -239,7 +244,7 @@ export const newGroup = (group_name, group_desc) => {
 // G2
 export const getGroupMeta = (group_id) => {
 	return new axios({
-		url: baseUrl + '/v1/groups/' + group_id,
+		url: baseUrl + '/groups/' + group_id,
 		method: GET
 	})
 };
@@ -247,7 +252,7 @@ export const getGroupMeta = (group_id) => {
 // G3
 export const updateGroupMeta = (group_id, group_name, group_desc) => {
 	return new axios({
-		url: baseUrl + '/v1/groups/' + group_id,
+		url: baseUrl + '/groups/' + group_id,
 		data: {
 			'group_name': group_name,
 			'group_desc': group_desc
@@ -257,9 +262,9 @@ export const updateGroupMeta = (group_id, group_name, group_desc) => {
 };
 
 // G4
-export const deleteGroup = (group_id, group_name, group_desc) => {
+export const deleteGroup = (group_id) => {
 	return new axios({
-		url: baseUrl + '/v1/groups/' + group_id,
+		url: baseUrl + '/groups/' + group_id,
 		method: DELETE
 	})
 };
@@ -267,7 +272,7 @@ export const deleteGroup = (group_id, group_name, group_desc) => {
 // G5
 export const addUserToGroup = (group_id, usersIdList) => {
 	return new axios({
-		url: baseUrl + '/v1/groups/' + group_id + '/members',
+		url: baseUrl + '/groups/' + group_id + '/members',
 		data: {
 			'usersIdList': usersIdList
 		},
@@ -278,7 +283,7 @@ export const addUserToGroup = (group_id, usersIdList) => {
 // G6
 export const getUserOfGroup = (group_id) => {
 	return new axios({
-		url: baseUrl + '/v1/groups/' + group_id + '/members',
+		url: baseUrl + '/groups/' + group_id + '/members',
 		method: GET
 	})
 };
@@ -286,7 +291,7 @@ export const getUserOfGroup = (group_id) => {
 // G7
 export const deleteUserOfGroup = (group_id, member_id) => {
 	return new axios({
-		url: baseUrl + '/v1/groups/' + group_id + '/members/' + member_id,
+		url: baseUrl + '/groups/' + group_id + '/members/' + member_id,
 		method: DELETE
 	})
 };
