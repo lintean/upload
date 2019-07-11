@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<uploader :options="options" class="uploader-example">
+		<uploader :options="options" class="uploader-example" ref="uploader">
 			<uploader-unsupport></uploader-unsupport>
 			<uploader-drop>
 				<p>Drop files here to upload or</p>
@@ -33,14 +33,21 @@
 
 <script>
 	export default {
-		name: 'Upload',
+		name: 'app',
 		data() {
 			return {
 				options: {
 					// https://github.com/simple-uploader/Uploader/tree/develop/samples/Node.js
-					target: '//localhost:3000/upload',
-					testChunks: false
+					target: "",
+					testChunks: false,
+					simultaneousUploads: 1,
+					singleFile: true
 				},
+				uploader: null,
+				objectName: "",
+				file_id: "",
+				cur_id: "",
+				currentUrl: "",
 				fileList: [{
 						fileName: "视频.mp4",
 						fileImgUrl: "https://shadow.elemecdn.com/app/element/hamburger.9cf7b091-55e9-11e9-a976-7f4d0b07eef6.png",
@@ -68,11 +75,82 @@
 				]
 			}
 		},
+		mounted: function() {
+			this.uploader = this.$refs.uploader.uploader;
+			console.log(this.uploader);
+			let _this = this;
+
+			this.uploader.on("fileSuccess", function(rootFile, file, message, chunk) {
+				console.log("fileSuccess");
+				// 上传成功后更新meta
+				let data = JSON.stringify({
+					'title': file.file.name,
+					'store_key': _this.objectName,
+					'doc_id': _this.cur_id,
+					'parentId': '',
+					'ext': file.getExtension(),
+					'creator': '',
+					'size': ''
+				})
+
+				$.ajax({
+					type: 'post',
+					url: 'http://192.168.199.182:8080/v1/files/' + _this.file_id,
+					data: data,
+					contentType: 'application/json',
+					success: function(datas) {
+						console.log(datas)
+					}
+				})
+			})
+
+			this.uploader.on("fileAdded", function(file, event) {
+				console.log("fileAdded");
+				// 从服务器获取一个URL
+				_this.policy(file.file, file.getExtension(), this.cur_id, (file, url) => {
+					// _this.options.target = url;
+					console.log(_this.uploader.opts.target);
+					_this.uploader.opts.target = url;
+					console.log(_this.uploader.opts.target);
+					console.log(_this.uploader);
+
+					let strings = url.split('/')
+					_this.objectName = ""
+					for (var i = 4; i < strings.length - 1; i++) {
+						_this.objectName += strings[i] + '/'
+					}
+					_this.file_id = strings[strings.length - 1].split('?')[0]
+					// 存储在oss里的key
+					_this.objectName += _this.file_id;
+				})
+			})
+		},
 		components: {},
 		computed: {},
 		methods: {
 			handleCommand(command) {
 				console.log('click on item ' + command[0] + command[1]);
+			},
+			policy(file, ext, cur_id, cb) {
+				var data = JSON.stringify({
+					'ext': ext,
+					'cur_id': cur_id
+				})
+				$.ajax({
+					type: 'post',
+					url: 'http://192.168.199.182:8080/v1/files/url',
+					data: data,
+					contentType: 'application/json',
+					success: function(datas) {
+						return cb(file, datas.data.url)
+					}
+				})
+
+			},
+			getUrl(file, chunk, flag) {
+				console.log("Url:");
+				console.log(this.currentUrl);
+				return this.currentUrl;
 			}
 		}
 	}

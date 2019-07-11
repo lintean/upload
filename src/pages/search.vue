@@ -16,6 +16,8 @@
 						</el-dropdown>
 						<el-button slot="append" icon="el-icon-search" @click="search"></el-button>
 					</el-autocomplete>
+
+					<el-button @click="turnToDoc" type="primary" style="position: absolute; right: 5%;">返回</el-button>
 				</div>
 			</el-header>
 			<el-container>
@@ -30,7 +32,9 @@
 									<el-checkbox v-for="(showCategory, index) in showCategories" :key="index" :label="showCategory.id" border size="medium"
 									 style="margin-right: 10px; margin-bottom: 10px;">{{showCategory.title}}</el-checkbox>
 								</el-checkbox-group>
-								<el-input v-model="category" placeholder="类目搜索框" size="medium" class="input"></el-input>
+								<el-autocomplete :fetch-suggestions="queryCategories" @select="addCategories" v-model="category" placeholder="搜索类目"
+								 size="medium" class="input">
+								</el-autocomplete>
 							</el-col>
 						</el-row>
 
@@ -40,10 +44,11 @@
 							</el-col>
 							<el-col :span="21">
 								<el-checkbox-group v-model="checkedTags" class="selection">
-									<el-checkbox v-for="(showTag, index) in showTags" :key="index" :label="showTag.id" border size="medium"
-									 style="margin-right: 10px; margin-bottom: 10px;">{{showTag.title}}</el-checkbox>
+									<el-checkbox v-for="(showTag, index) in showTags" :key="index" :label="showTag.id" border size="medium" style="margin-right: 10px; margin-bottom: 10px;">{{showTag.title}}</el-checkbox>
 								</el-checkbox-group>
-								<el-input v-model="tag" placeholder="标签搜索框" size="medium" class="input"></el-input>
+								<el-autocomplete :fetch-suggestions="queryTags" @select="addTags" v-model="tag" placeholder="搜索标签" size="medium"
+								 class="input">
+								</el-autocomplete>
 							</el-col>
 						</el-row>
 
@@ -54,7 +59,7 @@
 							<el-col :span="21">
 								<el-checkbox :indeterminate="isIndeterminate" style="margin-bottom: 10px;" v-model="allTypes" @change="handleCheckAllChange">全选</el-checkbox>
 								<el-checkbox-group v-model="defaultTypes" @change="handleCheckedTypesChange" class="selection">
-									<el-checkbox v-for="(type, index) in types" :label="type.key" :key="index" style="margin-bottom: 10px;"></el-checkbox>
+									<el-checkbox v-for="(type, index) in types" :label="type.key" :key="index" style="margin-bottom: 10px;">{{type.key + '(' + type.doc_count +')'}}</el-checkbox>
 								</el-checkbox-group>
 							</el-col>
 						</el-row>
@@ -65,10 +70,11 @@
 							</el-col>
 							<el-col :span="21">
 								<el-radio-group v-model="defaultCTime">
-									<el-radio v-for="(ct, index) in CTimes" :key="index" :label="ct.key" style="margin-bottom: 10px;"></el-radio>
+									<el-radio v-for="(ct, index) in CTimes" :key="index" :label="index" style="margin-bottom: 10px;">{{ct.key + '(' + ct.doc_count +')'}}</el-radio>
 								</el-radio-group>
 
-								<el-date-picker v-model="CTime" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期">
+								<el-date-picker v-model="CTime" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"
+								 format="yyyy 年 MM 月 dd 日" value-format="yyyy-MM-dd">
 								</el-date-picker>
 							</el-col>
 						</el-row>
@@ -79,10 +85,11 @@
 							</el-col>
 							<el-col :span="21">
 								<el-radio-group v-model="defaultETime">
-									<el-radio v-for="(et, index) in ETimes" :key="index" :label="et.key" style="margin-bottom: 10px;"></el-radio>
+									<el-radio v-for="(et, index) in ETimes" :key="index" :label="index" style="margin-bottom: 10px;">{{et.key + '(' + et.doc_count +')'}}</el-radio>
 								</el-radio-group>
 
-								<el-date-picker v-model="ETime" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期">
+								<el-date-picker v-model="ETime" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"
+								 format="yyyy 年 MM 月 dd 日" value-format="yyyy-MM-dd">
 								</el-date-picker>
 							</el-col>
 						</el-row>
@@ -91,13 +98,15 @@
 					<section class="contain_cnt">
 						<div style="display: flex; justify-content: flex-start; flex-wrap: wrap;">
 							<el-card @click.native="itemClicked" v-for="(item, index) in resultItems" :key="index" class="item">
-								<el-image :src="item.thumbnail" fit="cover">
-								</el-image>
-								<span>{{item.title}}</span>
+								<div class="img_cnt">
+									<el-image :src="item.thumbnail" fit="cover" class="img">
+									</el-image>
+								</div>
+								<span class="card_text">{{item.title}}</span>
 							</el-card>
 						</div>
 						<el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage"
-						 :page-sizes="[10, 20, 30, 40]" :page-size="10" layout="sizes, prev, pager, next" :total="400" style="text-align: center;">
+						 :page-sizes="[10, 20, 30, 40]" :page-size="10" layout="sizes, prev, pager, next" :total="itemTotal" style="text-align: center;">
 						</el-pagination>
 					</section>
 				</el-main>
@@ -109,7 +118,7 @@
 				<div class="input-cnt-phone">
 					<el-autocomplete placeholder="请输入内容" size="small" class="input-with-select" v-model="keyword" style="width: 100%;"
 					 :fetch-suggestions="querySearchAsync" @select="handleSelect">
-					
+
 						<el-dropdown slot="prepend" @command="dropdownClick">
 							<el-button type="primary">
 								{{typeOnshow}}<i class="el-icon-arrow-down el-icon--right"></i>
@@ -132,7 +141,7 @@
 				<section>
 					<div style="display: flex; justify-content: flex-start; flex-wrap: wrap;">
 						<el-card @click.native="itemClicked" v-for="(item, index) in resultItems" :key="index" class="item_phone">
-							<el-image :src="item.thumbnail" fit="cover">
+							<el-image :src="item.thumbnail" fit="cover" style="width:100%; height: ;">
 							</el-image>
 							<span>{{item.title}}</span>
 						</el-card>
@@ -140,7 +149,7 @@
 					<el-pagination small @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage"
 					 :page-size="10" layout="prev, pager, next" :total="400" style="text-align: center;">
 					</el-pagination>
-					
+
 				</section>
 			</el-main>
 		</el-container>
@@ -158,8 +167,8 @@
 				</el-collapse-item>
 				<el-collapse-item title="标签" name="标签">
 					<el-checkbox-group v-model="checkedTags" class="checkbox_group_phone">
-						<el-checkbox v-for="(showTag, index) in showCategories" :key="index" :label="showTag.id" border 
-						size="medium" class="checkbox_phone">{{showTag.title}}</el-checkbox>
+						<el-checkbox v-for="(showTag, index) in showCategories" :key="index" :label="showTag.id" border size="medium"
+						 class="checkbox_phone">{{showTag.title}}</el-checkbox>
 					</el-checkbox-group>
 					<el-input v-model="tag" placeholder="标签搜索框" size="medium" class="input"></el-input>
 				</el-collapse-item>
@@ -191,7 +200,7 @@
 </template>
 
 <script>
-	import * as Api from './api/api'
+	import * as Api from '../api/api'
 
 	const extOptions = [{
 			"key": "jpg",
@@ -306,7 +315,7 @@
 	]
 
 	export default {
-		name: "app",
+		name: "Search",
 		data() {
 			return {
 				// 手机端
@@ -315,6 +324,8 @@
 				// header搜索栏
 				searchType: [],
 				keyword: '',
+				keyword_backup: '',
+				isKeywordChanged: false,
 				searchSuggestions: [],
 				searchTypes: typeOptions,
 				typeOnshow: '全部',
@@ -327,14 +338,14 @@
 				defaultTypes: [],
 				CTimes: timeOptions,
 				ETimes: timeOptions,
-				defaultCTime: '全部',
-				defaultETime: '全部',
+				defaultCTime: 0,
+				defaultETime: 0,
 				// 自定义时间
 				CTime: '',
 				ETime: '',
 				// 结果展示
 				resultItems: [{
-						title: '文件1',
+						title: '文件文件文件文件文件文件文件文件文件文件文件文件文件文件文件文件文件',
 						thumbnail: "http://douban-test.oss-cn-beijing.aliyuncs.com/img/10432347.jpeg"
 					},
 					{
@@ -357,6 +368,11 @@
 				// 类目和标签搜索和展示
 				category: '',
 				tag: '',
+				categorySuggestions: [],
+				tagSuggestions: [],
+				categoryBackup: [],
+				tagBackup: [],
+
 				checkedCtgr: [],
 				showCategories: cate,
 				checkedTags: [],
@@ -370,6 +386,10 @@
 				// 分页
 				currentPage: 1,
 				currentPageSize: 10,
+				itemTotal: 0,
+
+				// 路由
+				currentResourceId: null,
 
 				// 以下是手机端参数
 				// 筛选条件抽屉
@@ -384,19 +404,26 @@
 			if (this.phone) {
 				// 暂时不用
 			}
+
+			// 路由检测
+			if (this.$route.query.keyword != null) {
+				this.keyword = this.$route.query.keyword;
+				this.currentResourceId = this.$route.query.resourceId;
+				this.search();
+			}
 		},
 		methods: {
 			itemClicked() {
 				alert("itemClicked");
 			},
 			handleCheckAllChange(value) {
-				this.defaultTypes = value ? extOptions : [];
+				this.defaultTypes = (value ? this.types : []);
 				this.isIndeterminate = false;
 			},
 			handleCheckedTypesChange(value) {
 				let checkedCount = value.length;
-				this.allTypes = (checkedCount === this.types.length);
-				this.isIndeterminate = (checkedCount > 0 && checkedCount < this.types.length);
+				this.isIndeterminate = (checkedCount > 0 && checkedCount <= this.types.length);
+				if (checkedCount < this.types.length) this.allTypes = false;
 			},
 			handleSizeChange(val) {
 				this.currentPageSize = val;
@@ -441,67 +468,95 @@
 				this.search();
 			},
 			search() {
+				if (this.keyword != this.keyword_backup) this.isKeywordChanged = true;
+				else this.isKeywordChanged = false;
+				this.keyword_backup = this.keyword;
+
+				if (this.isKeywordChanged) this.dataInit();
+
 				// 点击后处理
 				let _this = this;
-				let exts;
+				let exts = [];
 				if (this.allTypes) exts = ['all'];
 				else exts = this.defaultTypes;
 
-				
-				let created_time = {
-					from: this.changeTime(this.CTime[0]),
-					to: this.changeTime(this.CTime[1])
-				};
-				let modified_time = {
-					from: this.changeTime(this.ETime[0]),
-					to: this.changeTime(this.ETime[1])
-				};
+				let created_time;
+				if (this.defaultCTime == this.CTimes.length - 1) {
+					created_time = {
+						from: this.CTime[0],
+						to: this.CTime[1]
+					};
+				} else {
+					created_time = {
+						from: (this.CTimes[this.defaultCTime] != null ? this.CTimes[this.defaultCTime].from_as_string : null),
+						to: this.CTimes[this.defaultCTime] != null ? this.CTimes[this.defaultCTime].to_as_string : null
+					};
+				}
+
+				let modified_time;
+				if (this.defaultETime == this.ETimes.length - 1) {
+					modified_time = {
+						from: this.ETime[0],
+						to: this.ETime[1]
+					};
+				} else {
+					modified_time = {
+						from: this.ETimes[this.defaultETime] != null ? this.ETimes[this.defaultETime].from_as_string : null,
+						to: this.ETimes[this.defaultETime] != null ? this.ETimes[this.defaultETime].to_as_string : null
+					};
+				}
+
 
 				Api.Results(this.typeCommand, this.keyword, this.checkedTags, this.checkedCtgr, exts, created_time, modified_time,
 					"+8", this.currentPage, this.currentPageSize).then(
 					res => {
 						if (res.data.status === 200) {
 							// 结果数组
+							_this.itemTotal = res.data.data.total;
 							_this.resultItems.splice(0, _this.resultItems.length);
-							_this.resultItems = res.data.data.result;
+							_this.resultItems = res.data.data.results;
 
 							// 后缀名数组更新
 							_this.types.splice(0, _this.types.length);
-							_this.defaultTypes.splice(0, _this.defaultTypes.length);
-							_this.isIndeterminate = false;
-							_this.allTypes = true;
-							_this.types = res.data.data.group_by_ext.slice(1);
+							if (_this.isKeywordChanged) {
+								_this.defaultTypes.splice(0, _this.defaultTypes.length);
+								_this.isIndeterminate = false;
+								_this.allTypes = true;
+								_this.types = res.data.data.group_by_ext.slice(1);
+
+								for (let i = 0; i < _this.types.length; ++i)
+									_this.defaultTypes.push(_this.types[i].key);
+							} else {
+								_this.updateExts(res.data.data.group_by_ext);
+							}
 
 							// 创建时间数组更新
+							let reset = true;
+							for (let j = 0; j < res.data.data.group_by_created_time.length; ++j)
+								if (!_this.isKeywordChanged && _this.CTimes[_this.defaultCTime] != null && _this.CTimes[_this.defaultCTime].key ==
+									res.data.data.group_by_created_time[j].key) {
+									_this.defaultCTime = j;
+									reset = false;
+									break;
+								}
+							if (reset) _this.defaultCTime = 0;
 							_this.CTimes.splice(0, _this.CTimes.length);
-							_this.defaultCTime = ""
 							_this.CTimes = res.data.data.group_by_created_time;
 
 							// 修改时间数组更新
+							reset = true;
+							for (let j = 0; j < res.data.data.group_by_modified_time.length; ++j)
+								if (!_this.isKeywordChanged && _this.ETimes[_this.defaultETime] != null && this.ETimes[_this.defaultETime].key ==
+									res.data.data.group_by_modified_time[j].key) {
+									_this.defaultETime = j;
+									reset = false;
+									break;
+								}
+							if (reset) _this.defaultETime = 0;
 							_this.ETimes.splice(0, _this.ETimes.length);
-							_this.defaultETime = "";
 							_this.ETimes = res.data.data.group_by_modified_time;
 
-							// 获取类目和标签
-							Api.Associations(this.keyword, 5, 5).then(
-								res => {
-									if (res.data.status === 200) {
-										// 类目数组清空
-										_this.showCategories.splice(0, _this.showCategories.length);
-										_this.checkedCtgr.splice(0, _this.checkedCtgr.length);
-										_this.showCategories = res.data.data.categories;
-
-										// 标签数组清空
-										_this.checkedTags.splice(0, _this.checkedTags.length);
-										_this.showTags.splice(0, _this.showTags.length);
-										_this.showTags = res.data.data.tags;
-									} else {
-										alert(res.data.msg);
-									}
-								}).catch(err => {
-								console.log(err);
-							});
-
+							if (_this.isKeywordChanged) _this.getTAG();
 						} else {
 							alert(res.data.msg);
 						}
@@ -517,12 +572,142 @@
 			test() {
 
 			},
-			changeTime(dt) {
-				if (dt == null) return;
-				return [
-					[dt.getFullYear(), dt.getMonth() + 1, dt.getDate()].join('-'),
-					[dt.getHours(), dt.getMinutes(), dt.getSeconds()].join(':')
-				].join(' ').replace(/(?=\b\d\b)/g, '0');
+			// UTC转GMC+8 已废弃
+			// 			changeTime(dt) {
+			// 				if (dt == null) return;
+			// 				return [
+			// 					[dt.getFullYear(), dt.getMonth() + 1, dt.getDate()].join('-'),
+			// 					[dt.getHours(), dt.getMinutes(), dt.getSeconds()].join(':')
+			// 				].join(' ').replace(/(?=\b\d\b)/g, '0');
+			// 			},
+			getTAG() {
+				let _this = this;
+				// 获取类目和标签
+				Api.Associations(this.keyword, 5, 5).then(
+					res => {
+						if (res.data.status === 200) {
+							// 类目数组清空
+							_this.showCategories.splice(0, _this.showCategories.length);
+							_this.checkedCtgr.splice(0, _this.checkedCtgr.length);
+							_this.showCategories = res.data.data.categories;
+
+							// 标签数组清空
+							_this.checkedTags.splice(0, _this.checkedTags.length);
+							_this.showTags.splice(0, _this.showTags.length);
+							_this.showTags = res.data.data.tags;
+						} else {
+							alert(res.data.msg);
+						}
+					}).catch(err => {
+					console.log(err);
+				});
+			},
+			// 关键字不改变的情况下更新后缀名数组
+			updateExts(arr) {
+				arr = arr.slice(1);
+
+				let temp = [];
+				let defaultKeys = this.defaultTypes;
+				let arrKeys = [];
+				for (let i = 0; i < arr.length; ++i)
+					arrKeys.push(arr[i].key);
+				for (let i = 0; i < defaultKeys.length; ++i) {
+					if (arrKeys.indexOf(defaultKeys[i]) != -1) {
+						temp.push(this.defaultTypes[i]);
+					}
+				}
+				let allChecked = (defaultKeys.length == temp.length);
+				this.defaultTypes = temp;
+
+				// 全选按钮更新
+				if (arrKeys.length == 0 || allChecked) {
+					this.isIndeterminate = false;
+					this.allTypes = true;
+				} else {
+					this.isIndeterminate = true;
+					this.allTypes = false;
+				}
+				this.types = arr;
+			},
+			dataInit() {
+				// 数据初始化
+				this.allTypes = true;
+				this.isIndeterminate = false
+				this.defaultTypes = [];
+				this.CTimes = [];
+				this.ETimes = [];
+				this.defaultCTime = null;
+				this.defaultETime = null;
+				this.CTime = [];
+				this.ETime = [];
+
+				this.showCategories = [];
+				this.showTags = [];
+				this.checkedCtgr = [];
+				this.checkedTags = [];
+			},
+			queryCategories(queryString, cb) {
+				// 网络请求部分
+				let _this = this;
+				Api.Categories(this.category, 5).then(
+					res => {
+						if (res.data.status === 200) {
+							_this.categoryBackup = res.data.data;
+							// 数组清空
+							_this.categorySuggestions.splice(0, _this.searchSuggestions.length);
+							for (let i = 0; i < res.data.data.length; ++i) {
+								let temp = {
+									value: res.data.data[i].title,
+									id: res.data.data[i].id,
+									desc: res.data.data[i].desc,
+									index: i
+								};
+								_this.categorySuggestions.push(temp);
+							}
+							cb(_this.categorySuggestions);
+						} else {
+							alert(res.data.msg);
+						}
+					}).catch(err => {
+					console.log(err);
+				});
+			},
+			addCategories(item) {
+				this.showCategories.push(this.categoryBackup[item.index]);
+			},
+			queryTags(queryString, cb) {
+				// 网络请求部分
+				let _this = this;
+				Api.Tags(this.tag, 5).then(
+					res => {
+						if (res.data.status === 200) {
+							_this.tagBackup = res.data.data;
+							// 数组清空
+							_this.tagSuggestions.splice(0, _this.searchSuggestions.length);
+							for (let i = 0; i < res.data.data.length; ++i) {
+								let temp = {
+									value: res.data.data[i].title,
+									id: res.data.data[i].id,
+									desc: res.data.data[i].desc,
+									index: i
+								};
+								_this.tagSuggestions.push(temp);
+							}
+							cb(_this.tagSuggestions);
+						} else {
+							alert(res.data.msg);
+						}
+					}).catch(err => {
+					console.log(err);
+				});
+			},
+			addTags(item) {
+				this.showTags.push(this.tagBackup[item.index]);
+			},
+			turnToDoc() {
+				this.$router.push({
+					path: '/doc',
+				})
 			}
 		},
 	}
@@ -568,9 +753,9 @@
 	}
 
 	.item {
-		width: 120px;
+		width: 16%;
 		display: inline-block;
-		margin: 10px;
+		margin: 2%;
 		cursor: pointer;
 		text-align: center;
 	}
@@ -647,5 +832,30 @@
 		background-color: #DCDFE6;
 		position: relative;
 		box-sizing: border-box;
+	}
+
+	.img {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+	}
+
+	.img_cnt {
+		position: relative;
+		width: 100%;
+		height: 0px;
+		padding-top: 100%;
+	}
+
+	.card_text {
+		margin-top: 5%;
+		font-size: 1.25vw;
+		text-overflow: ellipsis;
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 1;
+		overflow: hidden;
 	}
 </style>
