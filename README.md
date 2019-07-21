@@ -2,10 +2,18 @@
 
 ## 主要用到的东西
  - vue用于前端框架
- - element ui用于前端样式
- - vue-pdf用于预览pdf
- - vue-simple-uploader用于上传文件
- - vue-video-player用于预览视频和音乐
+ - [element ui](https://element.eleme.cn/#/zh-CN/component/installation)和[ant-design-vue](https://vue.ant.design/docs/vue/introduce-cn/)用于前端样式
+ - [vue cli3](https://cli.vuejs.org/zh/)
+ - [vue router](https://router.vuejs.org/zh/installation.html)
+ - [vuex](https://vuex.vuejs.org/)
+
+
+
+## 文件结构
+
+![1563720071820](C:\Users\HAL\AppData\Roaming\Typora\typora-user-images\1563720071820.png)
+
+
 
 ## Project setup
 ```
