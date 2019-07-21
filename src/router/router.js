@@ -1,19 +1,16 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import App from '../App'
-import Doc from '../doc'
+import Doc from '../pages/doc'
 import Search from '../pages/search'
+import File from '../subpage/SingleFile'
 
 Vue.use(Router)
 
 export default new Router({
-// 	mode: "history",
+	mode: "hash",
 // 	base: '/tool/',
-	routes: [{
-			path: '/',
-			name: 'app',
-			component: App
-		},
+	routes: [
 		{
 			path: '/doc',
 			name: 'doc',
@@ -23,6 +20,11 @@ export default new Router({
 			path: '/search',
 			name: 'search',
 			component: Search
+		},
+		{ //需要跳转的页面
+			path: '/file',
+			name: 'file',
+			component: File
 		}
 	]
 })

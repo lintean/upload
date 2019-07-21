@@ -1,5 +1,4 @@
 import axios from 'axios'
-import Qs from 'qs'
 
 export const GET = "get";
 export const POST = "post";
@@ -11,7 +10,10 @@ axios.defaults.withCredentials = true;
 
 // export const baseUrl = "http://192.168.43.211:8089/v1";
 // export const baseUrl = "http://192.168.43.211:8080/v1";
-export const baseUrl = "http://39.108.210.48:8089/v1";
+// export const baseUrl = "http://localhost:8080/v1";
+// export const baseUrl = "http://39.108.210.48:8089/v1";
+export const baseUrl = "http://39.108.210.48:18090/v1";
+// export const baseUrl = "http://localhost/v1";
 
 // 用户相关
 // U2
@@ -84,7 +86,10 @@ export const Results = (type, keyword, tags, categories, exts, created_time, mod
 			'modified_time': modified_time,
 			'time_zone': time_zone,
 			'page': page,
-			'per_page': per_page
+			'per_page': per_page,
+			'desc_highlight_count': 2,
+			'content_highlight_count': 5,
+			'highlight_tag': 'em'
 		},
 		method: POST
 	})
@@ -104,58 +109,67 @@ export const Categories = (keyword, size) => {
 	})
 };
 
-// 资源类型: dir doc
+// 资源类型: dir doc file
 // 目录文档部分相关
-// D1
-export const newResources = (type, cur_id) => {
+
+// D1 统一
+export const newResource = (type, resource_id) => {
 	return new axios({
-		url: baseUrl + '/resources/',
+		url: baseUrl + '/' + type + 's',
 		data: {
-			'type': type,
+			'cur_id': resource_id
+		},
+		method: POST
+	})
+};
+// D1.1
+export const newDir = (cur_id) => {
+	return new axios({
+		url: baseUrl + '/dirs',
+		data: {
 			'cur_id': cur_id
 		},
-		method: POST,
-		withCredentials: true
+		method: POST
 	})
 };
-
-// D3
-export const editResources = (resource_id, dir_name) => {
+// D1.2
+export const newDoc = (cur_id) => {
 	return new axios({
-		url: baseUrl + '/resources/' + resource_id,
+		url: baseUrl + '/docs',
 		data: {
-			'dir_name': dir_name
+			'cur_id': cur_id
 		},
-		method: PUT
+		method: POST
 	})
 };
 
-// D4
-export const deleteResources = (resource_id) => {
+// D2.1 暂时没用
+export const getDirMeta = (dir_id) => {
 	return new axios({
-		url: baseUrl + '/resources/' + resource_id,
-		method: DELETE
-	})
-};
-
-// D5
-export const getResources = (id) => {
-	return new axios({
-		url: baseUrl + '/resources/' + id + '/slaves',
+		url: baseUrl + '/dirs/' + dir_id,
 		method: GET
 	})
 };
-
-// D6
-export const getResourceMeta = (doc_id) => {
+// D2.2
+export const getDocMeta = (doc_id) => {
 	return new axios({
 		url: baseUrl + '/docs/' + doc_id,
 		method: GET
 	})
 };
 
-// D7
-export const editResourceMeta = (doc_id, title, desc) => {
+// D3.1
+export const editDirMeta = (dir_id, dir_name) => {
+	return new axios({
+		url: baseUrl + '/dirs/' + dir_id,
+		data: {
+			'dir_name': dir_name
+		},
+		method: PUT
+	})
+};
+// D3.2
+export const editDocMeta = (doc_id, title, desc) => {
 	return new axios({
 		url: baseUrl + '/docs/' + doc_id,
 		data: {
@@ -163,6 +177,50 @@ export const editResourceMeta = (doc_id, title, desc) => {
 			'desc': desc
 		},
 		method: PATCH
+	})
+};
+
+// D4统一
+export const deleteResource = (type, dir_id) => {
+	return new axios({
+		url: baseUrl + '/' + type + 's/' + dir_id,
+		method: DELETE
+	})
+};
+// D4.1
+export const deleteDir = (dir_id) => {
+	return new axios({
+		url: baseUrl + '/dirs/' + dir_id,
+		method: DELETE
+	})
+};
+// D4.2
+export const deleteDoc = (doc_id) => {
+	return new axios({
+		url: baseUrl + '/docs/' + doc_id,
+		method: DELETE
+	})
+};
+
+// D5 统一
+export const getResources = (type, resource_id) => {
+	return new axios({
+		url: baseUrl + '/' + type + 's/' + resource_id + '/slaves',
+		method: GET
+	})
+}
+// D5.1
+export const getDir = (dir_id) => {
+	return new axios({
+		url: baseUrl + '/dirs/' + dir_id + '/slaves',
+		method: GET
+	})
+};
+// D5.1
+export const getDoc = (doc_id) => {
+	return new axios({
+		url: baseUrl + '/docs/' + doc_id + '/slaves',
+		method: GET
 	})
 };
 
@@ -183,9 +241,8 @@ export const deleteFile = (file_id) => {
 // F7
 export const Download = (file_id) => {
 	return new axios({
-		url: baseUrl + '/files/' + file_id + '/download?1sdfsdfsdfsdf',
-		method: GET,
-		responseType: 'arraybuffer'
+		url: baseUrl + '/files/' + file_id + '/download',
+		method: GET
 	})
 };
 

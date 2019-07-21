@@ -24,7 +24,7 @@ export function getBlob(url) {
  * @param  {Blob} blob     
  * @param  {String} filename 想要保存的文件名称
  */
-export function saveAs(blob, filename) {
+export function saveAs(blob, filename, callback) {
     if (window.navigator.msSaveOrOpenBlob) {
         navigator.msSaveBlob(blob, filename);
     } else {
@@ -43,6 +43,7 @@ export function saveAs(blob, filename) {
 
         window.URL.revokeObjectURL(link.href);
     }
+	callback();
 }
 
 /**
@@ -50,8 +51,8 @@ export function saveAs(blob, filename) {
  * @param  {String} url 目标文件地址
  * @param  {String} filename 想要保存的文件名称
  */
-export function download(url, filename) {
+export function download(url, filename, callback) {
     getBlob(url).then(blob => {
-        saveAs(blob, filename);
+        saveAs(blob, filename, callback);
     });
 }

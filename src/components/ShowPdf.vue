@@ -5,7 +5,8 @@
 			{{currentPage}} / {{pageCount}}
 			<el-button type="text" @click="changePdfPage(1)" class="turn" :class="{grey: currentPage==pageCount}">Next</el-button>
 		</p>
-		<pdf :src="src" :page="currentPage" @num-pages="pageCount=$event" @page-loaded="currentPage=$event" @loaded="loadPdfHandler">
+		<pdf :src="src" :page="currentPage" @num-pages="pageCount=$event" 
+		@page-loaded="currentPage=$event" @loaded="loadPdfHandler">
 		</pdf>
 <!-- 		src需要展示的PDF地址
 		当前展示的PDF页码

@@ -1,184 +1,145 @@
 <template>
-	<div>
-		<uploader :options="options" class="uploader-example" ref="uploader">
-			<uploader-unsupport></uploader-unsupport>
-			<uploader-drop>
-				<p>Drop files here to upload or</p>
-				<div style="display: flex; justify-content: flex-start; margin: 10px 0;">
-					<el-card v-for="(file, index) in fileList" :key="index" shadow="always" :body-style="{ padding: '0px'}" style="width: 250px; height: 300px; margin-left: 10px;">
-						<el-image :src="file.fileImgUrl" fit="fill" alt="fileImage" class="image"></el-image>
-						<div style="height: 50px; line-height: 50px;">
-							<span style="font-size: 14px; height: 50px; line-height: 50px;">{{file.fileName}}</span>
-							<el-dropdown @command="handleCommand" style="float: right; right: 10px;">
-								<span class="el-dropdown-link">
-									<i class="el-icon-edit"></i>
-								</span>
-								<el-dropdown-menu slot="dropdown">
-									<el-dropdown-item :command="[index,0]">预览</el-dropdown-item>
-									<el-dropdown-item :command="[index,1]">删除</el-dropdown-item>
-									<el-dropdown-item :command="[index,2]">历史</el-dropdown-item>
-								</el-dropdown-menu>
-							</el-dropdown>
-						</div>
-					</el-card>
-				</div>
-
-				<uploader-btn>select files</uploader-btn>
-			</uploader-drop>
-			<uploader-list></uploader-list>
-		</uploader>
-
-	</div>
+	<a-drawer title="上传文件" width=420 :closable="false" @close="close" :visible="uploadVisiable">
+		<el-upload style="text-align: center;" drag :action="url" :on-success="afterUpload" :before-upload="beforeUpload"
+		 :http-request="uploadFile">
+			<i class="el-icon-upload"></i>
+			<div>将文件拖到此处，或<span class="em">点击上传</span>
+			</div>
+		</el-upload>
+	</a-drawer>
 </template>
 
 <script>
+	import {
+		mapState
+	} from 'vuex'
+	import * as Api from '../api/api'
+	import * as DEFAULT from "../json/default"
+
 	export default {
-		name: 'app',
+		name: "Upload",
+		computed: {
+			...mapState([
+				'uploadVisiable'
+			])
+		},
+		props: [
+			'currentResourceId'
+		],
 		data() {
 			return {
-				options: {
-					// https://github.com/simple-uploader/Uploader/tree/develop/samples/Node.js
-					target: "",
-					testChunks: false,
-					simultaneousUploads: 1,
-					singleFile: true
-				},
-				uploader: null,
+				// 上传
+				url: "",
 				objectName: "",
 				file_id: "",
-				cur_id: "",
-				currentUrl: "",
-				fileList: [{
-						fileName: "视频.mp4",
-						fileImgUrl: "https://shadow.elemecdn.com/app/element/hamburger.9cf7b091-55e9-11e9-a976-7f4d0b07eef6.png",
-						fileUrl: "",
-						fileType: ""
-					},
-					{
-						fileName: "音乐.mp3",
-						fileImgUrl: "https://shadow.elemecdn.com/app/element/hamburger.9cf7b091-55e9-11e9-a976-7f4d0b07eef6.png",
-						fileUrl: "",
-						fileType: ""
-					},
-					{
-						fileName: "pdf文档.pdf",
-						fileImgUrl: "https://shadow.elemecdn.com/app/element/hamburger.9cf7b091-55e9-11e9-a976-7f4d0b07eef6.png",
-						fileUrl: "",
-						fileType: ""
-					},
-					{
-						fileName: "文件名",
-						fileImgUrl: "https://shadow.elemecdn.com/app/element/hamburger.9cf7b091-55e9-11e9-a976-7f4d0b07eef6.png",
-						fileUrl: "",
-						fileType: ""
-					}
-				]
+				fileExtension: "",
+				currentUserId: ""
 			}
 		},
-		mounted: function() {
-			this.uploader = this.$refs.uploader.uploader;
-			console.log(this.uploader);
-			let _this = this;
-
-			this.uploader.on("fileSuccess", function(rootFile, file, message, chunk) {
-				console.log("fileSuccess");
+		methods: {
+			// 上传函数
+			afterUpload(response, file, fileList) {
+				let _this = this;
 				// 上传成功后更新meta
 				let data = JSON.stringify({
-					'title': file.file.name,
+					'title': file.name.substring(0, file.name.lastIndexOf(".")),
 					'store_key': _this.objectName,
-					'doc_id': _this.cur_id,
+					'doc_id': _this.currentResourceId,
 					'parentId': '',
-					'ext': file.getExtension(),
-					'creator': '',
-					'size': ''
+					'ext': _this.fileExtension,
+					'creator': _this.currentUserId,
+					'size': Math.floor(file.size.toFixed(1))
 				})
 
 				$.ajax({
 					type: 'post',
-					url: 'http://192.168.199.182:8080/v1/files/' + _this.file_id,
+					// url: 'http://192.168.43.211:8089/v1/files/' + _this.file_id.substring(0, _this.file_id.lastIndexOf(".")),
+					// url: 'http://39.108.210.48:8089/v1/files/' + _this.file_id.substring(0, _this.file_id.lastIndexOf(".")),
+					url: Api.baseUrl + '/files/' + _this.file_id.substring(0, _this.file_id.lastIndexOf(".")),
 					data: data,
 					contentType: 'application/json',
+					xhrFields: {
+						withCredentials: true
+					},
+					crossDomain: true,
 					success: function(datas) {
-						console.log(datas)
+						_this.$parent.itemDBClicked(-1);
+						setTimeout(function() {
+							_this.close();
+						}, 500)
 					}
 				})
-			})
+			},
+			beforeUpload(file) {
+				let _this = this;
+				_this.fileExtension = file.name.split('.')[file.name.split('.').length - 1]
 
-			this.uploader.on("fileAdded", function(file, event) {
-				console.log("fileAdded");
 				// 从服务器获取一个URL
-				_this.policy(file.file, file.getExtension(), this.cur_id, (file, url) => {
-					// _this.options.target = url;
-					console.log(_this.uploader.opts.target);
-					_this.uploader.opts.target = url;
-					console.log(_this.uploader.opts.target);
-					console.log(_this.uploader);
-
-					let strings = url.split('/')
-					_this.objectName = ""
-					for (var i = 4; i < strings.length - 1; i++) {
-						_this.objectName += strings[i] + '/'
-					}
-					_this.file_id = strings[strings.length - 1].split('?')[0]
-					// 存储在oss里的key
-					_this.objectName += _this.file_id;
-				})
-			})
-		},
-		components: {},
-		computed: {},
-		methods: {
-			handleCommand(command) {
-				console.log('click on item ' + command[0] + command[1]);
+				this.policy(file);
 			},
-			policy(file, ext, cur_id, cb) {
+			policy(file) {
+				let _this = this;
 				var data = JSON.stringify({
-					'ext': ext,
-					'cur_id': cur_id
+					'ext': this.fileExtension,
+					'cur_id': this.currentResourceId
 				})
 				$.ajax({
 					type: 'post',
-					url: 'http://192.168.199.182:8080/v1/files/url',
+					// url: 'http://192.168.43.211:8089/v1/files/url',
+					// url: 'http://39.108.210.48:8089/v1/files/url',
+					url: Api.baseUrl + '/files/url',
 					data: data,
+					async: false,
 					contentType: 'application/json',
+					xhrFields: {
+						withCredentials: true
+					},
+					crossDomain: true,
 					success: function(datas) {
-						return cb(file, datas.data.url)
+						_this.url = datas.data.url;
+						_this.currentUserId = datas.data.creator;
+
+						let strings = _this.url.split('/')
+						_this.objectName = ""
+						for (var i = 4; i < strings.length - 1; i++) {
+							_this.objectName += strings[i] + '/'
+						}
+						_this.file_id = strings[strings.length - 1].split('?')[0]
+						// 存储在oss里的key
+						_this.objectName += _this.file_id;
 					}
 				})
-
 			},
-			getUrl(file, chunk, flag) {
-				console.log("Url:");
-				console.log(this.currentUrl);
-				return this.currentUrl;
+			uploadFile(params) {
+				let file = params.file;
+				let _this = this;
+				let xhr = new XMLHttpRequest()
+				xhr.upload.addEventListener("progress", function(evt) {
+					var percentComplete = Math.round(evt.loaded * 100 / evt.total);
+					params.onProgress({
+						percent: percentComplete
+					});
+				}, false)
+				xhr.open('PUT', this.url, true)
+				xhr.send(file)
+				xhr.onload = () => {
+					if (xhr.status == 200) {
+						params.onSuccess("上传成功");
+					}
+				}
+			},
+			close() {
+				this.$store.commit({
+					type: "uploadH"
+				})
 			}
 		}
 	}
 </script>
 
 <style>
-	.uploader-example {
-		width: 880px;
-		padding: 15px;
-		margin: 40px auto 0;
-		font-size: 12px;
-		box-shadow: 0 0 10px rgba(0, 0, 0, .4);
-	}
-
-	.uploader-example .uploader-btn {
-		margin-right: 4px;
-	}
-
-	.uploader-example .uploader-list {
-		max-height: 440px;
-		overflow: auto;
-		overflow-x: hidden;
-		overflow-y: auto;
-	}
-
-	.image {
-		width: 250px;
-		height: 250px;
-		display: block;
+	.em {
+		color: #409eff;
+		font-style: normal;
 	}
 </style>

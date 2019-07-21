@@ -1,9 +1,9 @@
 <template>
-	<div class="cnt_back">
-		<el-container class="cnt_width">
+	<div>
+		<el-container>
 			<el-header>
-				<div class="input-cnt">
-					<el-autocomplete placeholder="请输入内容" class="input-with-select" v-model="keyword" style="width: 100%;"
+				<div class="input-cnt-phone">
+					<el-autocomplete placeholder="请输入内容" size="small" class="input-with-select" v-model="keyword" style="width: 100%;"
 					 :fetch-suggestions="querySearchAsync" @select="handleSelect">
 
 						<el-dropdown slot="prepend" @command="dropdownClick">
@@ -14,186 +14,192 @@
 								<el-dropdown-item v-for="(searchType, index) in searchTypes" :key="index" :command="searchType">{{searchType.value}}</el-dropdown-item>
 							</el-dropdown-menu>
 						</el-dropdown>
-						<el-button slot="append" icon="el-icon-search" @click="search">搜索</el-button>
+						<el-button slot="append" icon="el-icon-search" @click="test"></el-button>
 					</el-autocomplete>
 				</div>
 			</el-header>
+			<el-main class="cnt_padding">
+				<div style="height: 35px">
+					<el-button @click="phoneSVisible = true" icon="el-icon-set-up el-icon--right" type="primary" size="small" style="float: right;">筛选条件</el-button>
+					<h2>搜索结果</h2>
+				</div>
+				<div class="dd"></div>
 
-			<el-main class="cnt_padding" v-loading="loading">
-				<section class="selection_cnt">
-					<el-row type="flex" class="row_bottom_line">
-						<el-col :span="3">
-							<span class="notication_padding">类目选择</span>
-						</el-col>
-						<el-col :span="21">
-							<el-checkbox-group v-model="checkedCtgr" class="selection" @change="!loading && search()">
-								<el-checkbox v-for="(showCategory, index) in showCategories" :key="index" :label="showCategory.id" border size="medium"
-								 style="margin-right: 10px; margin-bottom: 10px;">{{showCategory.title}}</el-checkbox>
-							</el-checkbox-group>
-							<el-autocomplete :fetch-suggestions="queryCategories" @select="addCategories" v-model="category" placeholder="搜索类目"
-							 size="medium" class="input">
-							</el-autocomplete>
-						</el-col>
-					</el-row>
-
-					<el-row type="flex" class="row_bottom_line">
-						<el-col :span="3">
-							<span class="notication_padding">标签选择</span>
-						</el-col>
-						<el-col :span="21">
-							<el-checkbox-group v-model="checkedTags" class="selection" @change="!loading && search()">
-								<el-checkbox v-for="(showTag, index) in showTags" :key="index" :label="showTag.id" border size="medium" style="margin-right: 10px; margin-bottom: 10px;">{{showTag.title}}</el-checkbox>
-							</el-checkbox-group>
-							<el-autocomplete :fetch-suggestions="queryTags" @select="addTags" v-model="tag" placeholder="搜索标签" size="medium"
-							 class="input">
-							</el-autocomplete>
-						</el-col>
-					</el-row>
-
-					<el-row type="flex" class="row_bottom_line">
-						<el-col :span="3">
-							<span class="notication_padding">文件后缀</span>
-						</el-col>
-						<el-col :span="21">
-							<el-checkbox style="margin-bottom: 10px;" v-model="allTypes" @change="handleCheckAllChange">全选</el-checkbox>
-							<el-checkbox-group v-model="defaultTypes" @change="handleCheckedTypesChange" class="selection">
-								<el-checkbox v-for="(type, index) in types" :label="type.key" :key="index" style="margin-bottom: 10px;">{{type.key + '(' + type.doc_count +')'}}</el-checkbox>
-							</el-checkbox-group>
-						</el-col>
-					</el-row>
-
-					<el-row type="flex" class="row_bottom_line">
-						<el-col :span="3">
-							<span class="notication_padding">创建时间</span>
-						</el-col>
-						<el-col :span="21">
-							<el-radio-group @change="!loading && defaultCTime != CTimes.length - 1 && search()" v-model="defaultCTime">
-								<el-radio v-for="(ct, index) in CTimes" :key="index" :label="index" style="margin-bottom: 10px;">{{ct.key + '(' + ct.doc_count +')'}}</el-radio>
-							</el-radio-group>
-
-							<el-date-picker v-show="defaultCTime == CTimes.length - 1" v-model="CTime" type="daterange" range-separator="-"
-							 start-placeholder="开始日期" end-placeholder="结束日期" format="yyyy 年 MM 月 dd 日" value-format="yyyy-MM-dd"
-							 @change="!loading && search()">
-							</el-date-picker>
-						</el-col>
-					</el-row>
-
-					<el-row type="flex" class="row_top_line">
-						<el-col :span="3">
-							<span class="notication_padding">修改时间</span>
-						</el-col>
-						<el-col :span="21">
-							<el-radio-group @change="!loading && defaultCTime != CTimes.length - 1 && search()" v-model="defaultETime">
-								<el-radio v-for="(et, index) in ETimes" :key="index" :label="index" style="margin-bottom: 10px;">{{et.key + '(' + et.doc_count +')'}}</el-radio>
-							</el-radio-group>
-
-							<el-date-picker v-show="defaultETime == ETimes.length - 1" v-model="ETime" type="daterange" range-separator="-"
-							 start-placeholder="开始日期" end-placeholder="结束日期" format="yyyy 年 MM 月 dd 日" value-format="yyyy-MM-dd"
-							 @change="!loading && search()">
-							</el-date-picker>
-						</el-col>
-					</el-row>
-				</section>
-
-				<section class="contain_cnt">
-					<div style="height: 50px">
-						<div style="float: left;">
-							<span>共{{itemTotal}}个搜索结果</span>
-						</div>
-
-						<el-button-group style="float: right;">
-							<el-button @click="isList = false" :type="isList ? 'normal' : 'primary'">图标</el-button>
-							<el-button @click="isList = true" :type="!isList ? 'normal' : 'primary'">列表</el-button>
-						</el-button-group>
+				<section>
+					<div style="display: flex; justify-content: flex-start; flex-wrap: wrap;">
+						<el-card @click.native="itemClicked" v-for="(item, index) in resultItems" :key="index" class="item_phone">
+							<el-image :src="item.thumbnail" fit="cover" style="width:100%; height: ;">
+							</el-image>
+							<span>{{item.title}}</span>
+						</el-card>
 					</div>
-
-					<div v-if="!isList" class="card_cnt">
-						<el-popover placement="right-end" trigger="hover" class="item" width=420 v-for="(item, index) in resultItems"
-						 :key="index">
-							<el-card slot="reference" @click.native="itemClicked">
-								<div class="img_cnt">
-									<el-image :src="item.thumbnail" fit="cover" class="img">
-										<div slot="error">
-											<i class="el-icon-picture-outline"></i>
-										</div>
-									</el-image>
-								</div>
-								<span class="card_text" v-html="item.title_highlight">{{item.title_highlight + '.' + item.ext}}</span>
-							</el-card>
-
-							<div class="popover_content">
-								<el-row style="margin-top: 10px;">
-									<el-col :offset="1" :span="5" style="text-align: right;">文件名：</el-col>
-									<el-col :offset="2" :span="16">
-										<span v-html="item.title_highlight">{{item.title_highlight + '.' + item.ext}}</span>
-									</el-col>
-								</el-row>
-								<el-row style="margin-top: 10px;">
-									<el-col :offset="1" :span="5" style="text-align: right;">创建时间：</el-col>
-									<el-col :offset="2" :span="16">
-										<span>{{item.created_time}}</span>
-									</el-col>
-								</el-row>
-								<el-row style="margin-top: 10px;">
-									<el-col :offset="1" :span="5" style="text-align: right;">修改时间：</el-col>
-									<el-col :offset="2" :span="16">
-										<span>{{item.modified_time}}</span>
-									</el-col>
-								</el-row>
-								<el-row style="margin-top: 10px;">
-									<el-col :offset="1" :span="5" style="text-align: right;">简介：</el-col>
-									<el-col :offset="2" :span="16">
-										<span v-for="(desc, index) in item.desc_highlights" :key="index" v-html="desc">
-											{{desc}}
-										</span>
-									</el-col>
-								</el-row>
-								<el-row style="margin-top: 10px;" v-if="item.content_highlights != null">
-									<el-col :offset="1" :span="5" style="text-align: right;">内容：</el-col>
-									<el-col :offset="2" :span="16">
-										<span v-for="(content, index) in item.content_highlights" :key="index" v-html="content">
-											{{content}}
-										</span>
-									</el-col>
-								</el-row>
-							</div>
-						</el-popover>
-					</div>
-
-					<div v-if="isList" class="card_cnt">
-						<el-row v-for="(item, index) in resultItems" :key="index" style="height: 220px; width: 100%; padding: 10px; overflow: hidden;">
-							<el-col :span="5">
-								<el-image :src="item.thumbnail" fit="cover" style="max-height: 200px;">
-									<div slot="error" class="image-slot">
-										<i class="el-icon-picture-outline image-slot-icon"></i>
-									</div>
-								</el-image>
-							</el-col>
-							<el-col :offset="1" :span="18">
-								<h3 v-html="item.title_highlight" style="color: #08c;">{{item.title_highlight + '.' + item.ext}}</h3>
-								<span v-for="(desc, index) in item.desc_highlights" :key="index" class="list_text" v-html="desc" style="color: #666; font-weight: 300;">
-									{{desc}}
-								</span>
-								<span v-for="(content, index) in item.content_highlights" :key="index" v-html="content">
-									{{content}}
-								</span>
-							</el-col>
-						</el-row>
-					</div>
-
-					<el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage"
-					 :page-sizes="[10, 20, 30, 40]" :page-size="10" layout="sizes, prev, pager, next" :total="itemTotal" style="text-align: center;">
+					<el-pagination small @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage"
+					 :page-size="10" layout="prev, pager, next" :total="400" style="text-align: center;">
 					</el-pagination>
+
 				</section>
 			</el-main>
-
 		</el-container>
+
+		<!-- 筛选条件抽屉 -->
+		<a-drawer placement="right" :closable="false" @close="phoneSVisible = false" :visible="phoneSVisible">
+
+			<el-collapse v-model="activeNames">
+				<el-collapse-item title="类目" name="类目">
+					<el-checkbox-group v-model="checkedCtgr" class="checkbox_group_phone">
+						<el-checkbox v-for="(showCategory, index) in showCategories" :key="index" :label="showCategory.id" border size="medium"
+						 class="checkbox_phone">{{showCategory.title}}</el-checkbox>
+					</el-checkbox-group>
+					<el-input v-model="category" placeholder="类目搜索框" size="medium" class="input"></el-input>
+				</el-collapse-item>
+				<el-collapse-item title="标签" name="标签">
+					<el-checkbox-group v-model="checkedTags" class="checkbox_group_phone">
+						<el-checkbox v-for="(showTag, index) in showCategories" :key="index" :label="showTag.id" border size="medium"
+						 class="checkbox_phone">{{showTag.title}}</el-checkbox>
+					</el-checkbox-group>
+					<el-input v-model="tag" placeholder="标签搜索框" size="medium" class="input"></el-input>
+				</el-collapse-item>
+				<el-collapse-item title="文件后缀" name="文件后缀">
+					<el-checkbox :indeterminate="isIndeterminate" class="checkbox_phone" border v-model="allTypes" @change="handleCheckAllChange">全选</el-checkbox>
+					<el-checkbox-group v-model="defaultTypes" @change="handleCheckedTypesChange" class="checkbox_group_phone">
+						<el-checkbox v-for="(type, index) in types" border :label="type.key" :key="index" class="checkbox_phone"></el-checkbox>
+					</el-checkbox-group>
+				</el-collapse-item>
+				<el-collapse-item title="创建时间" name="创建时间">
+					<el-radio-group v-model="defaultCTime" class="checkbox_group_phone">
+						<el-radio v-for="(ct, index) in CTimes" border :key="index" :label="ct.key" class="checkbox_phone"></el-radio>
+					</el-radio-group>
+
+					<el-date-picker v-model="CTime" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期">
+					</el-date-picker>
+				</el-collapse-item>
+				<el-collapse-item title="修改时间" name="修改时间">
+					<el-radio-group v-model="defaultETime" class="checkbox_group_phone">
+						<el-radio v-for="(et, index) in ETimes" border :key="index" :label="et.key" class="checkbox_phone"></el-radio>
+					</el-radio-group>
+
+					<el-date-picker v-model="ETime" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期">
+					</el-date-picker>
+				</el-collapse-item>
+			</el-collapse>
+		</a-drawer>
 	</div>
 </template>
 
 <script>
 	import * as Api from '../api/api'
-	import * as DEFAULT from "../json/default"
+
+	const extOptions = [{
+			"key": "jpg",
+			"doc_count": 50
+		},
+		{
+			"key": "png",
+			"doc_count": 30
+		},
+		{
+			"key": "gif",
+			"doc_count": 20
+		}
+	];
+	const timeOptions = [{
+			"key": "全部",
+			"doc_count": 100
+		},
+		{
+			"key": "三天内",
+			"doc_count": 6
+		},
+		{
+			"key": "一周内",
+			"doc_count": 15
+		},
+		{
+			"key": "一个月内",
+			"doc_count": 23
+		},
+		{
+			"key": "三个月内",
+			"doc_count": 25
+		},
+		{
+			"key": "半年内",
+			"doc_count": 27
+		},
+		{
+			"key": "一年内",
+			"doc_count": 50
+		},
+		{
+			"key": "一年前",
+			"doc_count": 50
+		}
+	];
+	const typeOptions = [{
+		value: '全部',
+		command: 'all'
+	}, {
+		value: '图片',
+		command: 'image'
+	}, {
+		value: '文档',
+		command: 'doc'
+	}, {
+		value: '视频',
+		command: 'video'
+	}, {
+		value: '音频',
+		command: 'audio'
+	}, {
+		value: '其他文件',
+		command: 'others'
+	}];
+	const cate = [{
+			"id": 6,
+			"title": "科技"
+		},
+		{
+			"id": 1,
+			"title": "文学"
+		},
+		{
+			"id": 2,
+			"title": "流行"
+		},
+		{
+			"id": 3,
+			"title": "文化"
+		},
+		{
+			"id": 4,
+			"title": "生活"
+		},
+		{
+			"id": 5,
+			"title": "经管"
+		}
+	];
+	const tg = [{
+			"id": 137,
+			"title": "算法"
+		},
+		{
+			"id": 2998,
+			"title": "计算机"
+		},
+		{
+			"id": 2697,
+			"title": "计算机科学"
+		},
+		{
+			"id": 66,
+			"title": "哲学"
+		},
+		{
+			"id": 133,
+			"title": "编程"
+		}
+	]
 
 	export default {
 		name: "Search",
@@ -205,23 +211,44 @@
 				keyword_backup: '',
 				isKeywordChanged: false,
 				searchSuggestions: [],
-				searchTypes: DEFAULT.typeOptions,
+				searchTypes: typeOptions,
 				typeOnshow: '全部',
 				typeCommand: 'all',
 
 				// 后缀名时间单多选
-				types: DEFAULT.extOptions,
+				types: extOptions,
+				isIndeterminate: false,
 				allTypes: true,
 				defaultTypes: [],
-				CTimes: DEFAULT.timeOptions,
-				ETimes: DEFAULT.timeOptions,
+				CTimes: timeOptions,
+				ETimes: timeOptions,
 				defaultCTime: 0,
 				defaultETime: 0,
 				// 自定义时间
 				CTime: '',
 				ETime: '',
 				// 结果展示
-				resultItems: [],
+				resultItems: [{
+						title: '文件文件文件文件文件文件文件文件文件文件文件文件文件文件文件文件文件',
+						thumbnail: "http://douban-test.oss-cn-beijing.aliyuncs.com/img/10432347.jpeg"
+					},
+					{
+						title: '文件1',
+						thumbnail: "http://douban-test.oss-cn-beijing.aliyuncs.com/img/10432347.jpeg"
+					},
+					{
+						title: '文件1',
+						thumbnail: "http://douban-test.oss-cn-beijing.aliyuncs.com/img/10432347.jpeg"
+					},
+					{
+						title: '文件1',
+						thumbnail: "http://douban-test.oss-cn-beijing.aliyuncs.com/img/10432347.jpeg"
+					},
+					{
+						title: '文件1',
+						thumbnail: "http://douban-test.oss-cn-beijing.aliyuncs.com/img/10432347.jpeg"
+					}
+				],
 				// 类目和标签搜索和展示
 				category: '',
 				tag: '',
@@ -231,9 +258,9 @@
 				tagBackup: [],
 
 				checkedCtgr: [],
-				showCategories: DEFAULT.cate,
+				showCategories: cate,
 				checkedTags: [],
-				showTags: DEFAULT.tg,
+				showTags: tg,
 				// 已选条件展示（废弃
 				selectedOptions: [
 					"XXXXX",
@@ -248,13 +275,10 @@
 				// 路由
 				currentResourceId: null,
 
-				//图表、列表模式
-				isList: false,
-
-				// loading
-				loading: false,
-				// 是否正在搜索 用loading代替
-				// Searching: false,
+				// 以下是手机端专属参数
+				// 筛选条件抽屉
+				phoneSVisible: false,
+				activeNames: ['类目', '标签']
 			}
 		},
 		mounted: function() {
@@ -265,24 +289,23 @@
 				this.search();
 			}
 		},
-		watch: {},
 		methods: {
-			itemClicked() {},
+			itemClicked() {
+				alert("itemClicked");
+			},
 			handleCheckAllChange(value) {
 				// console.log(value);
 				let temp = [];
-				for (let i = 0; i < this.types.length; ++i) {
+				for (let i = 0; i < this.types.length; ++i){
 					temp.push(this.types[i].key);
 				}
 				this.defaultTypes = (value ? temp : []);
-
-				this.search();
+				this.isIndeterminate = false;
 			},
 			handleCheckedTypesChange(value) {
 				let checkedCount = value.length;
+				this.isIndeterminate = (checkedCount > 0 && checkedCount <= this.types.length);
 				if (checkedCount < this.types.length) this.allTypes = false;
-
-				this.search();
 			},
 			handleSizeChange(val) {
 				this.currentPageSize = val;
@@ -292,7 +315,7 @@
 				this.currentPage = val;
 				this.search();
 			},
-			// 搜索建议部分
+			// 搜索部分
 			querySearchAsync(queryString, cb) {
 				// cb(results);网络请求部分
 				let _this = this;
@@ -321,10 +344,6 @@
 				this.search();
 			},
 			search() {
-				// loading动画
-				this.loading = true;
-				this.Searching = true;
-
 				if (this.keyword != this.keyword_backup) this.isKeywordChanged = true;
 				else this.isKeywordChanged = false;
 				this.keyword_backup = this.keyword;
@@ -363,6 +382,7 @@
 					};
 				}
 
+
 				Api.Results(this.typeCommand, this.keyword, this.checkedTags, this.checkedCtgr, exts, created_time, modified_time,
 					"+8", this.currentPage, this.currentPageSize).then(
 					res => {
@@ -376,6 +396,7 @@
 							_this.types.splice(0, _this.types.length);
 							if (_this.isKeywordChanged) {
 								_this.defaultTypes.splice(0, _this.defaultTypes.length);
+								_this.isIndeterminate = false;
 								_this.allTypes = true;
 								_this.types = res.data.data.group_by_ext.slice(1);
 
@@ -412,7 +433,6 @@
 							_this.ETimes = res.data.data.group_by_modified_time;
 
 							if (_this.isKeywordChanged) _this.getTAG();
-							else _this.loading = false;
 						} else {
 							alert(res.data.msg);
 						}
@@ -424,9 +444,18 @@
 			dropdownClick(searchType) {
 				this.typeOnshow = searchType.value;
 				this.typeCommand = searchType.command;
-
-				this.search();
 			},
+			test() {
+
+			},
+			// UTC转GMC+8 已废弃
+			// 			changeTime(dt) {
+			// 				if (dt == null) return;
+			// 				return [
+			// 					[dt.getFullYear(), dt.getMonth() + 1, dt.getDate()].join('-'),
+			// 					[dt.getHours(), dt.getMinutes(), dt.getSeconds()].join(':')
+			// 				].join(' ').replace(/(?=\b\d\b)/g, '0');
+			// 			},
 			getTAG() {
 				let _this = this;
 				// 获取类目和标签
@@ -442,8 +471,6 @@
 							_this.checkedTags.splice(0, _this.checkedTags.length);
 							_this.showTags.splice(0, _this.showTags.length);
 							_this.showTags = res.data.data.tags;
-
-							_this.loading = false;
 						} else {
 							alert(res.data.msg);
 						}
@@ -453,7 +480,6 @@
 			},
 			// 关键字不改变的情况下更新后缀名数组
 			updateExts(arr) {
-				let originLength = arr.length;
 				arr = arr.slice(1);
 
 				let temp = [];
@@ -466,16 +492,23 @@
 						temp.push(this.defaultTypes[i]);
 					}
 				}
-				console.log("originLength" + originLength);
-				console.log(defaultKeys);
-				console.log(temp);
+				let allChecked = (defaultKeys.length == temp.length);
 				this.defaultTypes = temp;
 
+				// 全选按钮更新
+				if (arrKeys.length == 0 || allChecked) {
+					this.isIndeterminate = false;
+					this.allTypes = true;
+				} else {
+					this.isIndeterminate = true;
+					this.allTypes = false;
+				}
 				this.types = arr;
 			},
 			dataInit() {
 				// 数据初始化
 				this.allTypes = true;
+				this.isIndeterminate = false
 				this.defaultTypes = [];
 				this.CTimes = [];
 				this.ETimes = [];
@@ -516,25 +549,7 @@
 				});
 			},
 			addCategories(item) {
-				// 选中值是否在原数组里
-				let isContain = false;
-				let i;
-				for (i = 0; i < this.showCategories.length; ++i)
-					if (this.showCategories[i].title == item.value) {
-						isContain = true;
-						break;
-					}
-
-				// 在就将原数组的对应值选上（已经选上就不用选了
-				// 不在就添加然后选上
-				if (isContain) {
-					if (this.checkedCtgr.indexOf(item.id) == -1) this.checkedCtgr.push(item.id);
-				} else {
-					this.showCategories.push(this.categoryBackup[item.index]);
-					this.checkedCtgr.push(item.id);
-				}
-
-				this.search();
+				this.showCategories.push(this.categoryBackup[item.index]);
 			},
 			queryTags(queryString, cb) {
 				// 网络请求部分
@@ -563,25 +578,7 @@
 				});
 			},
 			addTags(item) {
-				// 选中值是否在原数组里
-				let isContain = false;
-				let i;
-				for (i = 0; i < this.showTags.length; ++i)
-					if (this.showTags[i].title == item.value) {
-						isContain = true;
-						break;
-					}
-
-				// 在就将原数组的对应值选上（已经选上就不用选了
-				// 不在就添加然后选上
-				if (isContain) {
-					if (this.checkedTags.indexOf(item.id) == -1) this.checkedTags.push(item.id);
-				} else {
-					this.showTags.push(this.tagBackup[item.index]);
-					this.checkedTags.push(item.id);
-				}
-
-				this.search();
+				this.showTags.push(this.tagBackup[item.index]);
 			},
 			turnToDoc() {
 				this.$router.push({
@@ -598,7 +595,7 @@
 	}
 
 	.input-cnt {
-		width: 80%;
+		width: 60%;
 		margin: 10px auto 0 auto;
 	}
 
@@ -663,7 +660,6 @@
 	.cnt_padding {
 		padding-left: 5% !important;
 		padding-right: 5% !important;
-		text-align: left;
 	}
 
 	.notication_padding {
@@ -737,53 +733,5 @@
 		-webkit-box-orient: vertical;
 		-webkit-line-clamp: 1;
 		overflow: hidden;
-	}
-
-	.list_text {
-		text-overflow: ellipsis;
-		display: -webkit-box;
-		-webkit-box-orient: vertical;
-		-webkit-line-clamp: 3;
-		overflow: hidden;
-		margin-top: 5px;
-	}
-
-	.card_cnt {
-		display: flex;
-		justify-content: flex-start;
-		flex-wrap: wrap;
-	}
-
-	.card_cnt em,
-	.popover_content em {
-		color: #dd4b39 !important;
-		font-style: normal;
-		font-weight: normal;
-	}
-
-	.cnt_back {
-		background: url("https://gw.alipayobjects.com/zos/rmsportal/TVYTbAXWheQpRcWDaDMu.svg") no-repeat 50%;
-		background-size: 100%;
-		background-origin: padding-box;
-		background-repeat: repeat-y;
-		position: relative;
-		color: #000000;
-	}
-
-	.cnt_width {
-		width: 70%;
-		min-width: 800px;
-		margin: 0 auto;
-	}
-
-	.image-slot {
-		height: 150px;
-		width: 150px;
-		line-height: 150px;
-		text-align: center;
-	}
-
-	.image-slot-icon {
-		font-size: 50px;
 	}
 </style>
