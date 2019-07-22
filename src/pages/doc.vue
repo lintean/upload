@@ -200,10 +200,10 @@
 							// 处理结果(统一部分)
 							_this.handleResource(res);
 						} else {
-							_this.changeError(err);
+							_this.handleError(err);
 						}
 					}).catch(err => {
-					_this.changeError(err);
+					_this.handleError(err);
 				});
 			},
 			backToUpper() {
@@ -240,7 +240,7 @@
 							_this.$message.error(res.data.msg);
 						}
 					}).catch(err => {
-					_this.changeError(err);
+					_this.handleError(err);
 				});
 			},
 			goToNext() {
@@ -276,7 +276,7 @@
 							_this.$message.error(res.data.msg);
 						}
 					}).catch(err => {
-					_this.changeError(err);
+					_this.handleError(err);
 				});
 			},
 			handleResource(res) {
@@ -325,7 +325,7 @@
 								});
 						}
 					}).catch(err => {
-					_this.changeError(err);
+					_this.handleError(err);
 				});
 			},
 			// 打开各种meta信息
@@ -344,7 +344,9 @@
 					res => {
 						if (res.data.status === 200) {
 							let temp = res.data.data;
-							let image = require('../assets/images/doc.png');
+							let image;
+							if (type == "doc") image = require('../assets/images/doc.png');
+							if (type == "dir") image = require('../assets/images/docCnt.png');
 
 							_this.docList.push({
 								"created_time": temp.created_at,
@@ -358,7 +360,7 @@
 							_this.$message.error(res.data.msg);
 						}
 					}).catch(err => {
-					_this.changeError(err);
+					_this.handleError(err);
 				});
 			},
 			resourceDelete() {
@@ -377,7 +379,7 @@
 									_this.$message.error(res.data.msg);
 								}
 							}).catch(err => {
-							_this.changeError(err);
+							_this.handleError(err);
 						});
 					}
 				});
@@ -398,7 +400,7 @@
 									_this.$message.error(res.data.msg);
 								}
 							}).catch(err => {
-							_this.changeError(err);
+							_this.handleError(err);
 						});
 					}
 				});
@@ -421,7 +423,7 @@
 							_this.$message.error(res.data.msg);
 						}
 					}).catch(err => {
-					_this.changeError(err);
+					_this.handleError(err);
 				});
 			},
 			turnToSearch(item) {
@@ -480,10 +482,9 @@
 			callUpload() {
 				this.$store.commit("uploadV");
 			},
-			changeError(err) {
+			handleError(err) {
 				console.log(err);
 				this.$message.warning(DEFAULT.defaultNetwordError);
-				this.$parent.stopEditNameByIndex(this.index);
 			}
 		}
 	}

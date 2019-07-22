@@ -130,7 +130,7 @@
 					}
 				}).catch(err => {
 				_this.loginData.visible = true;
-				_this.changeError(err);
+				_this.handleError(err);
 			});
 
 			this.changeKeys(window.location.hash);
@@ -195,7 +195,7 @@
 							_this.$message.error(res.data.msg);
 						}
 					}).catch(err => {
-					_this.changeError(err);
+					_this.handleError(err);
 				});
 			},
 			logout() {
@@ -209,7 +209,7 @@
 							alert(res.data.msg);
 						}
 					}).catch(err => {
-					_this.changeError(err);
+					_this.handleError(err);
 				});
 			},
 			// 侧边栏
@@ -250,10 +250,9 @@
 				if (hash == '#/doc') this.selectedKeys = ["2"];
 				if (hash == '#/search') this.selectedKeys = ["4"];
 			},
-			changeError(err) {
+			handleError(err) {
 				console.log(err);
 				this.$message.warning(DEFAULT.defaultNetwordError);
-				this.$parent.stopEditNameByIndex(this.index);
 			}
 		}
 	}
