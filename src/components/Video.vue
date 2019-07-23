@@ -10,6 +10,9 @@
 </template>
 
 <script>
+	// 视频预览和音频预览
+	// 暂时没有用上
+	
 	import 'video.js/dist/video-js.css'
 	import {
 		videoPlayer

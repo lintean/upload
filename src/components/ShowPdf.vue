@@ -17,6 +17,9 @@
 </template>
 
 <script>
+	// pdf预览
+	// 暂时没有用上
+	
 	import pdf from 'vue-pdf'
 	export default {
 		name: 'ShowPdf',
