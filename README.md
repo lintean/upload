@@ -11,7 +11,7 @@
 
 ## 文件结构
 
-![1563720071820](C:\Users\HAL\AppData\Roaming\Typora\typora-user-images\1563720071820.png)
+![1563720071820](./public/1563720071820.png)
 
 
 
