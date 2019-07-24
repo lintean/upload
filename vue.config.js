@@ -32,6 +32,28 @@ module.exports = {
 	// 		},
 	// 		
 	// 	},
+
+	//设置图标的
+	// lintOnSave: false, 
+	// pwa:{
+    //     iconPaths:{
+    //         favicon32: 'favicon.png',
+    //         favicon16: 'favicon.png',
+    //         appleTouchIcon: 'favicon.png',
+    //         maskIcon: 'favicon.png',
+    //         msTileImage: 'favicon.png'
+    //     }
+	// },
+	pwa: {
+		iconPath: {
+		  favicon32: './favicon.png',
+		  favicon16: './favicon.png',
+		  appleTouchIcon: './favicon.png',
+		  maskIcon: './favicon.png',
+		  msTileImage: './favicon.png'
+		}
+	},
+
 	configureWebpack: config => {
 		if (process.env.NODE_ENV === 'production') {
 			return {
