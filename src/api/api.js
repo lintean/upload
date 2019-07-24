@@ -159,11 +159,11 @@ export const getDocMeta = (doc_id) => {
 };
 
 // D3.1
-export const editDirMeta = (dir_id, dir_name) => {
+export const editDirMeta = (dir_id, title) => {
 	return new axios({
 		url: baseUrl + '/dirs/' + dir_id,
 		data: {
-			'dir_name': dir_name
+			'title': title
 		},
 		method: PUT
 	})
