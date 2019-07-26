@@ -1493,9 +1493,9 @@ Response Body:
 
 ```
 
-#### F9.Retrieve File Meta
+#### F9.获取文件meta
 
-获取文件meta
+Retrieve File Meta
 
 [GET] `/files/{file_id}`
 
@@ -1543,9 +1543,9 @@ Response Body
 
 ```
 
-#### F10.Update File Meta
+#### F10.更新文件meta
 
-更新文件meta
+Update File Meta
 
 > 部分更新，仅可更新部分字段
 
@@ -1624,7 +1624,9 @@ Response Body
 
 ```
 
-#### F11.Create Tag / Category
+#### F11.增加标签或类目
+
+Create Tag / Category
 
 [POST] `/tags/`
 
@@ -1655,7 +1657,9 @@ Response Body
 
 ```
 
-#### F12.Retrieve Tag / Category
+#### F12.检索标签或类目
+
+Retrieve Tag / Category
 
 [GET] `/tags/{tag_id}`
 
@@ -1681,7 +1685,9 @@ Response Body
 
 ```
 
-#### F13. Update Tag / Category
+#### F13. 更新标签或类目、
+
+Update Tag / Category
 
 [PUT] `/tags/{tag_id}`
 
@@ -1717,7 +1723,9 @@ Response Body
 
 ```
 
-#### F14.Delete Tag / Category
+#### F14.删除标签或类目
+
+Delete Tag / Category
 
 [DELETE] `/tags/{tag_id}`
 
@@ -1739,7 +1747,9 @@ Response Body
 
 ```
 
-#### F15.Get File Tags / Categories
+#### F15.获取标签或类目
+
+Get File Tags / Categories
 
 [GET] `/files/{file_id}/tags`
 
@@ -1784,7 +1794,9 @@ Response Body
 
 ```
 
-#### F16.Update File Tags / Categories
+#### F16.更新文件标签或类目
+
+Update File Tags / Categories
 
 [PUT] `/files/{file_id}/tags`
 
@@ -1817,7 +1829,7 @@ Response Body
 
 ### 权限模块
 
-#### F1.添加群组对指定目录或文档的操作权限	
+#### P1.添加群组对指定目录或文档的操作权限	
 
 [POST] /v1/resources/{resource_id}/permissions
 
@@ -1850,7 +1862,7 @@ Response Body
 
 
 
-#### F2.撤销群组对指定目录或文档的操作权限
+#### P2.撤销群组对指定目录或文档的操作权限
 
 [DELETE] /v1/resources/{resource_id}/permissions
 
@@ -1876,7 +1888,7 @@ Response Body
 
 ```
 
-#### F3.获取对指定资源有操作权限的群组信息
+#### P3.获取对指定资源有操作权限的群组信息
 
 [GET] /v1/resources/{resource_id}/authgroups
 
@@ -1908,7 +1920,7 @@ Response Body
 
 ```
 
-#### F4.获取群组具有操作权限的所有资源信息
+#### P4.获取群组具有操作权限的所有资源信息
 
 [GET] /v1/groups/{group_id}/authresources
 

@@ -1,6 +1,7 @@
 <template>
   <div style="padding: 24px;" @click="stopEditName">
     <div style="height: 50px;">
+      <!-- 目录和文档的操作 -->
       <div style="float: left" v-if="!isCurrentFileLayout">
         <el-button type="primary" style="position: relative;" @click.stop="newResource('doc')">新建文档</el-button>
         <el-button @click.stop="newResource('dir')">新建文件夹</el-button>
@@ -11,6 +12,7 @@
           <el-button @click.stop="callGroup">权限和群组</el-button>
         </el-button-group>
       </div>
+      <!-- 文件的操作 -->
       <div style="float: left" v-if="isCurrentFileLayout">
         <el-button type="primary" style="position: relative;" @click.stop="callUpload">上传文件</el-button>
         <el-button-group style="margin-left: 10px;" v-show="currentItemClicked > 0">
@@ -34,6 +36,7 @@
         </el-autocomplete>
       </div>
     </div>
+    <!-- 显示面包屑（路径） -->
     <div>
       <el-breadcrumb separator-class="el-icon-arrow-right" class="breadcrumb_route">
         <el-breadcrumb-item
@@ -43,7 +46,9 @@
         >{{document.title}}</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
+    
     <div class="light_divider"></div>
+    <!-- 显示目录和文档 -->
     <div style="display: flex; justify-content: flex-start; margin: 10px 0; flex-wrap: wrap;">
       <resource-card
         v-for="(doc, index) in docList"
@@ -312,9 +317,10 @@ export default {
           ].thumbnail_url = require("../assets/images/docCnt.png");
         if (res.data.data[i].thumbnail == "./assets/images/doc.png")
           res.data.data[i].thumbnail_url = require("../assets/images/doc.png");
-        if (res.data.data[i].thumbnail_url == null)
+        if (res.data.data[i].thumbnail_url == null) {
+          this.$message.warning("缩略图生成中");
           res.data.data[i].thumbnail_url = require("../assets/images/file.png");
-
+        }
         res.data.data[i].isEditStatus = false;
       }
 
@@ -363,9 +369,11 @@ export default {
     },
     // 打开各种meta信息
     openMeta() {
+      // console.log(this.docList[this.currentItemClicked]);
+      //docList里面 没有了resource_type 只有type
       if (this.isCurrentFileLayout) {
         this.$store.commit("fileMetaV");
-      } else if (this.docList[this.currentItemClicked].resource_type == "dir") {
+      } else if (this.docList[this.currentItemClicked].type == "dir") {
         this.$store.commit("dirMetaV");
       } else {
         this.$store.commit("docMetaV");
@@ -380,7 +388,6 @@ export default {
             let image;
             if (type == "doc") image = require("../assets/images/doc.png");
             if (type == "dir") image = require("../assets/images/docCnt.png");
-
             _this.docList.push({
               created_time: temp.created_at,
               thumbnail_url: image,
@@ -389,6 +396,7 @@ export default {
               id: temp.resource_id,
               title: temp.resource_name
             });
+            _this.$message.warning("新建成功");
           } else {
             _this.$message.error(res.data.msg);
           }
@@ -413,12 +421,12 @@ export default {
             if (res.data.status === 200) {
               _this.docList.splice(_this.currentItemClicked, 1);
               _this.currentItemClicked = -1;
-            //   console.log("删除成功");
+              //   console.log("删除成功");
               _this.$message.warning("删除成功");
             } else {
               // _this.$message.error(res.data.msg);
-              _this.$message.error("删除失败 后台无法连接");
-            //   console.log(4);
+              _this.$message.warning("删除失败 后台无法连接");
+              //   console.log(4);
             }
           });
           // .catch(err => {
@@ -437,24 +445,26 @@ export default {
       this.$alert("此操作将永久删除该资源, 是否继续?", "删除资源", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
-		type: "warning",
-		 })
+        type: "warning"
+      })
         .then(() => {
-        // callback: (action, instance) => {
-          Api.deleteFile(_this.docList[_this.currentItemClicked].id)
-            .then(res => {
+          // callback: (action, instance) => {
+          Api.deleteFile(_this.docList[_this.currentItemClicked].id).then(
+            res => {
               if (res.data.status === 200) {
-				_this.docList.splice(_this.currentItemClicked, 1);
-				 _this.$message.warning("删除成功");
+                _this.docList.splice(_this.currentItemClicked, 1);
+                _this.$message.warning("删除成功");
               } else {
-                _this.$message.error("删除失败 后台无法连接");
+                _this.$message.warning("删除失败 后台无法连接");
               }
-            })
-            // .catch(err => {
-            //   _this.handleError(err);
-            // });
-        // }
-      }).catch(() => {
+            }
+          );
+          // .catch(err => {
+          //   _this.handleError(err);
+          // });
+          // }
+        })
+        .catch(() => {
           _this.$message.warning("已取消删除");
         });
     },

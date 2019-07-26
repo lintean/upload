@@ -16,7 +16,7 @@
 		<el-row style="margin-top: 10px;">
 			<el-col :offset="1" :span="5" style="text-align: right;">创建时间：</el-col>
 			<el-col :offset="2" :span="16">
-				<span>{{dirMeta.created_time.substr(0,19)}}</span>
+				<span>{{showDirCreatTime}}</span>
 			</el-col>
 		</el-row>
 	</a-drawer>
@@ -27,6 +27,12 @@
 	
 	export default {
 		name: "DirMeta",
+		data() {
+			return {
+				showDirCreatTime:"yyyy-mm-dd xx:xx:xx"
+			}
+		},
+
 		computed: {
 			...mapState([
 				'clickedItemId',
@@ -36,6 +42,16 @@
 		props:[
 			'dirMeta'
 		],
+		watch:{
+			dirMetaVisible(){
+				//时间里面有个T,去除一下
+				var year = this.dirMeta.created_time.substr(0,10);
+				var hoursT = this.dirMeta.created_time.substr(10,3);
+				var minAndSecon = this.dirMeta.created_time.substr(13,6);
+				var newHours = parseInt(hoursT.substr(1,2))+8;
+				this.showDirCreatTime = year +" "+newHours.toString()+minAndSecon;
+			}
+		},
 		methods:{
 			close(){
 				this.$store.commit({

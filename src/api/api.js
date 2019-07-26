@@ -15,8 +15,22 @@ export const baseUrl = "http://39.108.210.48:8089/v1";
 // export const baseUrl = "http://39.108.210.48:18090/v1";
 // export const baseUrl = "http://localhost/v1";
 
-// 用户相关
-// U2
+// 用户模块
+// U1	新建用户
+export const newUser = (work_no, username,password,email) => {
+	return new axios({
+		url: baseUrl + '/users',
+		data: {
+			'work_no': work_no,
+			'username':username,
+			'password': password,
+			'email':email
+		},
+		method: POST
+	})
+};
+
+// U2	用户登录
 export const Login = (work_no, password) => {
 	return new axios({
 		url: baseUrl + '/login',
@@ -28,7 +42,7 @@ export const Login = (work_no, password) => {
 	})
 };
 
-// U3
+// U3	获取用户元数据
 export const getUser = () => {
 	return new axios({
 		url: baseUrl + '/users/current',
@@ -36,7 +50,7 @@ export const getUser = () => {
 	})
 };
 
-// U4
+// U4	注销登录
 export const Logout = () => {
 	return new axios({
 		url: baseUrl + '/users/logout',
@@ -44,18 +58,23 @@ export const Logout = () => {
 	})
 };
 
-// U5
-export const getGroupOfUser = (user_id) => {
+// U5 获取用户所在群组
+// export const getGroupOfUser = (user_id) => {
+// 	return new axios({
+// 		url: baseUrl + '/v1/users/' + user_id + '/groups',
+// 		method: GET
+// 	})
+// };
+export const getGroupOfUser = () => {
 	return new axios({
-		url: baseUrl + '/v1/users/' + user_id + '/groups',
+		url: baseUrl + '/v1/users/current/groups',
 		method: GET
 	})
 };
 
-
 // 检索相关
 
-// S1
+// S1	搜索建议
 export const Suggestions = (type, keyword, size) => {
 	return new axios({
 		url: baseUrl + '/search/suggestions?type=' + type + '&keyword=' + keyword + '&size=' + size,
@@ -63,7 +82,7 @@ export const Suggestions = (type, keyword, size) => {
 	})
 };
 
-// S2
+// S2	获取高度相关的类目标签
 export const Associations = (keyword, tag_count, category_count) => {
 	return new axios({
 		url: baseUrl + '/search/associations?keyword=' + keyword + '&tag_count=' + tag_count + '&category_count=' +
@@ -72,7 +91,7 @@ export const Associations = (keyword, tag_count, category_count) => {
 	})
 };
 
-// S3
+// S3	搜索结果
 export const Results = (type, keyword, tags, categories, exts, created_time, modified_time, time_zone, page, per_page) => {
 	return new axios({
 		url: baseUrl + '/search/results',
@@ -95,7 +114,7 @@ export const Results = (type, keyword, tags, categories, exts, created_time, mod
 	})
 };
 
-// S4
+// S4	搜索类目或标签
 export const Tags = (keyword, size) => {
 	return new axios({
 		url: baseUrl + '/search/tags?keyword=' + keyword + '&size=' + size,
@@ -112,7 +131,7 @@ export const Categories = (keyword, size) => {
 // 资源类型: dir doc file
 // 目录文档部分相关
 
-// D1 统一
+// D1 统一	新建资源
 export const newResource = (type, resource_id) => {
 	return new axios({
 		url: baseUrl + '/' + type + 's',
@@ -122,7 +141,7 @@ export const newResource = (type, resource_id) => {
 		method: POST
 	})
 };
-// D1.1
+// D1.1		新建目录
 export const newDir = (cur_id) => {
 	return new axios({
 		url: baseUrl + '/dirs',
@@ -132,7 +151,7 @@ export const newDir = (cur_id) => {
 		method: POST
 	})
 };
-// D1.2
+// D1.2	新建文档
 export const newDoc = (cur_id) => {
 	return new axios({
 		url: baseUrl + '/docs',
@@ -143,14 +162,14 @@ export const newDoc = (cur_id) => {
 	})
 };
 
-// D2.1 暂时没用
+// D2.1 获取目录元数据  暂时没用
 export const getDirMeta = (dir_id) => {
 	return new axios({
 		url: baseUrl + '/dirs/' + dir_id,
 		method: GET
 	})
 };
-// D2.2
+// D2.2	获取文档元数据
 export const getDocMeta = (doc_id) => {
 	return new axios({
 		url: baseUrl + '/docs/' + doc_id,
@@ -158,7 +177,7 @@ export const getDocMeta = (doc_id) => {
 	})
 };
 
-// D3.1
+// D3.1	更新目录名称
 export const editDirMeta = (dir_id, title) => {
 	return new axios({
 		url: baseUrl + '/dirs/' + dir_id,
@@ -168,7 +187,7 @@ export const editDirMeta = (dir_id, title) => {
 		method: PUT
 	})
 };
-// D3.2
+// D3.2	更新文档元数据
 export const editDocMeta = (doc_id, title, desc) => {
 	return new axios({
 		url: baseUrl + '/docs/' + doc_id,
@@ -180,21 +199,21 @@ export const editDocMeta = (doc_id, title, desc) => {
 	})
 };
 
-// D4统一
+// D4统一	删除资源
 export const deleteResource = (type, dir_id) => {
 	return new axios({
 		url: baseUrl + '/' + type + 's/' + dir_id,
 		method: DELETE
 	})
 };
-// D4.1
+// D4.1	删除目录
 export const deleteDir = (dir_id) => {
 	return new axios({
 		url: baseUrl + '/dirs/' + dir_id,
 		method: DELETE
 	})
 };
-// D4.2
+// D4.2	删除文档
 export const deleteDoc = (doc_id) => {
 	return new axios({
 		url: baseUrl + '/docs/' + doc_id,
@@ -202,21 +221,21 @@ export const deleteDoc = (doc_id) => {
 	})
 };
 
-// D5 统一
+// D5 统一	获取下级资源
 export const getResources = (type, resource_id) => {
 	return new axios({
 		url: baseUrl + '/' + type + 's/' + resource_id + '/slaves',
 		method: GET
 	})
 }
-// D5.1
+// D5.1	获取指定目录下的子目录或文档
 export const getDir = (dir_id) => {
 	return new axios({
 		url: baseUrl + '/dirs/' + dir_id + '/slaves',
 		method: GET
 	})
 };
-// D5.1
+// D5.2	获取指定文档下的文件
 export const getDoc = (doc_id) => {
 	return new axios({
 		url: baseUrl + '/docs/' + doc_id + '/slaves',
@@ -225,7 +244,7 @@ export const getDoc = (doc_id) => {
 };
 
 // 文件相关
-// F6
+// F6	删除文件
 export const deleteFile = (file_id) => {
 	return new axios({
 		url: baseUrl + '/files',
@@ -238,7 +257,7 @@ export const deleteFile = (file_id) => {
 	})
 };
 
-// F7
+// F7	下载文件 
 export const Download = (file_id) => {
 	return new axios({
 		url: baseUrl + '/files/' + file_id + '/download',
@@ -246,7 +265,7 @@ export const Download = (file_id) => {
 	})
 };
 
-// F9
+// F9	获取文件meta
 export const getFileMeta = (file_id) => {
 	return new axios({
 		url: baseUrl + '/files/' + file_id,
@@ -254,7 +273,7 @@ export const getFileMeta = (file_id) => {
 	})
 };
 
-// F10
+// F10	更新文件meta
 export const editFileMeta = (file_id, title, desc, categories, tags) => {
 	return new axios({
 		url: baseUrl + '/files/' + file_id,
@@ -270,7 +289,7 @@ export const editFileMeta = (file_id, title, desc, categories, tags) => {
 
 
 
-// F16
+// F15 获取文件标签 或 类目
 export const getFileCategories = (file_id) => {
 	return new axios({
 		url: baseUrl + '/files/' + file_id + '/categories',
@@ -326,7 +345,7 @@ export const deleteGroup = (group_id) => {
 	})
 };
 
-// G5
+// G5 
 export const addUserToGroup = (group_id, usersIdList) => {
 	return new axios({
 		url: baseUrl + '/groups/' + group_id + '/members',
@@ -354,7 +373,7 @@ export const deleteUserOfGroup = (group_id, member_id) => {
 };
 
 // 权限部分
-// P1
+// P1	添加群组对指定目录或文档的操作权限
 export const addPermission = (resource_id, permission, groupsIdList) => {
 	return new axios({
 		url: baseUrl + '/resources/' + resource_id + '/permissions',
@@ -366,7 +385,7 @@ export const addPermission = (resource_id, permission, groupsIdList) => {
 	})
 };
 
-// P2
+// P2	撤销群组对指定目录或文档的操作权限
 export const deletePermission = (resource_id, group_id) => {
 	return new axios({
 		url: baseUrl + '/resources/' + resource_id + '/permissions',
@@ -377,7 +396,7 @@ export const deletePermission = (resource_id, group_id) => {
 	})
 };
 
-// P3
+// P3	获取对指定资源有操作权限的群组信息
 export const getGroupOfResourceHadPermission = (resource_id) => {
 	return new axios({
 		url: baseUrl + '/resources/' + resource_id + '/authgroups',
@@ -385,4 +404,4 @@ export const getGroupOfResourceHadPermission = (resource_id) => {
 	})
 };
 
-// P4 获取群组具有操作权限的所有资源信息 暂时不用
+// P4  获取群组具有操作权限的所有资源信息 暂时不用

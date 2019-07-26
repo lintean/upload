@@ -1,6 +1,6 @@
-###  用户模块
+### 用户模块
 
-#### U1.新建用户（后续后台管理页面，管理员调用）
+#### U1.新建用户
 
 [POST] /v1/users
 
@@ -27,7 +27,7 @@ Response Body
 
 #### U2.用户登录
 
-[POST] /v1/users/login
+[POST] /v1/login
 
 Request Body
 
@@ -43,28 +43,60 @@ Response Body
 ```json
 {
   "status": 200,
-  "msg": "success",
-  "data": null
+  "msg": "OK",
+  "data": {
+    "userInfo": {
+      "work_no": "0001",
+      "email": "zhangSan@gmail.com",
+      "username": "张三"
+    },
+    "master_dirs": [
+      {
+        "resource_id": "b64b725b-ef13-4e3f-9d98-ddb3152981a6",
+        "resource_name": "home"
+      },
+      {
+        "resource_id": "e3a10377-edcc-4a8a-8cce-396b0e223f48",
+        "resource_name": "root"
+      }
+    ],
+    "resource_id": "b57a392d-6510-4116-99db-f76cc16a78e5",
+    "resource_name": "张三"
+  }
 }
 ```
 
-#### U3.获取用户元数据（用户登录系统时调用）
+#### U3.获取用户元数据
 
-[GET] /v1/users/{current}/
+[GET] /v1/users/{user_id}
 
-* current: 查看当前用户的个人信息，可替换为user_id
+- user_id: 用户id，可替换为current（查询当前用户的元数据）
 
 Response Body
 
 ```json
 {
-    "statusCode": 200,
-    "msg": "success",
-    "data": {
-        "work_no": "7788", // 员工工号
-        "username": "hello", // 用户名
-        "email": "hello@Gmail.com" // 邮箱
-    }
+  "status": 200,
+  "msg": "OK",
+  "data": {
+    "userInfo": {
+      "work_no": "0001",
+      "email": "zhangSan@gmail.com",
+      "username": "张三"
+    },
+    "master_dirs": [
+      {
+        "resource_id": "b64b725b-ef13-4e3f-9d98-ddb3152981a6",
+        "resource_name": "home"
+      },
+      {
+        "resource_id": "e3a10377-edcc-4a8a-8cce-396b0e223f48",
+        "resource_name": "root"
+      }
+    ],
+    "resource_id": "b57a392d-6510-4116-99db-f76cc16a78e5",
+    "resource_name": "张三"
+  }
 }
 ```
 
@@ -84,30 +116,26 @@ Response Body
 
 #### U5.获取用户所在群组
 
-[GET] /v1/users/{current}/groups
+[GET] /v1/users/{user_id}/groups
 
-* current: 查看当前用户所在的群组，可替换为任意user_id，查看不同用户所在的群组
+- user_id: 用户id，可替换为current
 
 Response Body
 
 ```json
 {
-    "statusCode": 200,
-    "msg": "success",
-    "data": [
-        {
-            "group_id": "b57a392d-6510-4116-99db-f76cc16a78e5", // 群组id
-            "group_name": "programmer", // 群组名称
-            "creator_id": "1cbbf901-24ad-40fd-a35a-5dce15c82333", // 创建者id
-            "created_at": "2019-02-23 07:30:25" // 创建时间
-        },
-        {
-			"group_id": "c96c2465-62b0-47d6-b164-d51cb849deab",
-            "group_name": "tester",
-            "creator_id": "e1f5f562-2e96-4b3e-a6ff-e3f953c5b368",
-            "created_at": "2019-06-16 12:45:12"
-        }
-    ]
+  "status": 200,
+  "msg": "OK",
+  "data": [
+    {
+      "group_id": "16bd8e6b-d05d-4dfc-b6ce-ebfca1efc228",
+      "group_name": "admin",
+      "group_desc": "管理员",
+      "creator_id": "e1f5f562-2e96-4b3e-a6ff-e3f953c5b368",
+      "created_at": "2019-07-08T09:54:21.121+0000",
+      "personal": 0
+    }
+  ]
 }
 ```
 
@@ -121,76 +149,85 @@ Request Body
 
 ```json
 {
-    "group_name": "programmer" // 群组名称
+    "group_name": "programmer", // 群组名称
+    "group_desc": "苦逼程序员" // 群组描述字段
 }
 ```
-
 
 Response Body
 
 ```json
 {
-    "statusCode": 200,
-    "msg": "success",
-    "data": {
-        "group_id": "e3a10377-edcc-4a8a-8cce-396b0e223f48", // 群组id
-        "group_name": "programmer", // 群组名称
-        "creator_id": " 1cbbf901-24ad-40fd-a35a-5dce15c82333", // 创建者id
-        "created_at": "2019-07-01 20:58:10" // 创建时间
-    }
+  "status": 200,
+  "msg": "OK",
+  "data": {
+    "group_id": "92d8e6c3-a661-4157-814c-a3838ef83456",
+    "group_name": "巴萨球迷",
+    "group_desc": "巴萨是最菜的",
+    "creator_id": "e1f5f562-2e96-4b3e-a6ff-e3f953c5b368",
+    "created_at": "2019-07-09T16:58:05.462+0000",
+    "personal": 0
+  }
 }
+
 ```
 
 #### G2.获取群组元数据
 
 [GET] /v1/groups/{group_id}
 
-* group_id: 群组id
+- group_id: 群组id
 
 Response Body
 
 ```json
 {
-    "statusCode": 200,
-    "msg": "success",
-    "data": {
-        "group_id": "e3a10377-edcc-4a8a-8cce-396b0e223f48", // 群组id
-        "group_name": "programmer", // 群组名称
-        "creator_id": " 1cbbf901-24ad-40fd-a35a-5dce15c82333", // 创建者id
-        "created_at": "2019-07-01 20:58:10" // 创建时间
-    }
+  "status": 200,
+  "msg": "OK",
+  "data": {
+    "group_id": "92d8e6c3-a661-4157-814c-a3838ef83456",
+    "group_name": "巴萨球迷",
+    "group_desc": "巴萨是最菜的",
+    "creator_id": "e1f5f562-2e96-4b3e-a6ff-e3f953c5b368",
+    "created_at": "2019-07-09T16:58:05.462+0000",
+    "personal": 0
+  }
 }
+
 ```
 
 #### G3.修改群组元数据
 
 [PUT] /v1/groups/{group_id}
 
-* group_id: 群组id
+- group_id: 群组id
 
 Request Body
 
 ```json
 {
-    "group_name": "newbility" // 群组名称
+    "group_name": "newbility", // 群组名称
+    "group_desc": "非常牛b" // 群组描述字段
 }
+
 ```
 
 Response Body
 
 ```json
 {
-    "statusCode": 200,
-    "msg": "success",
-    "data": null
+  "status": 200,
+  "msg": "OK",
+  "data": null
 }
+
 ```
 
 #### G4.删除群组
 
 [DELETE] /v1/groups/{group_id}
 
-* group_id: 群组id
+- group_id: 群组id
 
 Resposne Body
 
@@ -200,13 +237,14 @@ Resposne Body
     "msg": "success",
     "data": null
 }
+
 ```
 
 #### G5.添加群组用户
 
 [POST] /v1/groups/{group_id}/members
 
-* group_id: 群组id
+- group_id: 群组id
 
 Request Body
 
@@ -219,6 +257,7 @@ Request Body
         "6272b618-a4e5-49c3-a4cb-69a94605c692"
     ]
 }
+
 ```
 
 Response Body
@@ -229,33 +268,33 @@ Response Body
     "msg": "success",
     "data": null
 }
+
 ```
 
 #### G6.获取群组用户
 
 [GET] /v1/groups/{group_id}/members
 
-* group_id: 群组id
+- group_id: 群组id
 
 Response Body
 
 ```json
 {
-    "statusCode": 200,
-    "msg": "success",
-    "data": [
-        {
-        	"user_id": "1cbbf901-24ad-40fd-a35a-5dce15c82333", // 用户id
-            "username": "jennifer", // 用户名
-            "work_no": "7788" // 用户工号
-        },
-        {
-            "user_id": "24c16cd4-a2e6-4bd5-91b2-ab51c87b7514",
-            "username": "oliver",
-            "work_no": "9527"
-        }
-    ]
+  "status": 200,
+  "msg": "OK",
+  "data": {
+    "memberList": [
+      {
+        "user_id": "e1f5f562-2e96-4b3e-a6ff-e3f953c5b368",
+        "work_no": "0001",
+        "username": "张三"
+      }
+    ],
+    "isOwner": 1
+  }
 }
+
 ```
 
 
@@ -264,8 +303,8 @@ Response Body
 
 [DELETE] /v1/groups/{group_id}/members/{member_id}
 
-* group_id: 群组id
-* member_id: 成员id 
+- group_id: 群组id
+- member_id: 成员id 
 
 Response Body
 
@@ -275,6 +314,7 @@ Response Body
     "msg": "success",
     "data": null
 }
+
 ```
 
 ### 检索模块
@@ -957,164 +997,112 @@ Response Body
 }
 ```
 
-
 ### 目录文档模块
 
 #### D1.新建资源
 
-[POST] /v1/resources/{type}
+##### D1.1 新建目录
 
-* type: 资源类型
-
-Request Body
-
-```json
-{
-	"cur_id": "e911f136-35ad-416a-b195-7b1fad4bd7f1 ", // 当前所在目录id
-}
-```
-
-Response Body
-
-```json
-{
-    "statusCode": 200,
-    "msg": "success",
-    "data": {
-        "resource_id": "b6519605-6132-4ba5-9039-cec0f7fc9fe3", // 资源id
-        "resource_name": "undefined", // 默认资源名称
-        "type": "dir", // 资源类型
-        "creator_id": "5c397e61-ee45-4af1-b094-4363b5fdf305", // 创建者id
-        "created_at": "2019-07-01 19:51:08" // 创建时间
-    }
-}
-```
-
-#### D2.获取资源元数据（业务数据库 PostgreSQL)
-
-[GET] /v1/resources/{resource_id}
-
-* resource_id: 资源id
-
-Response Body
-
-```json
-{
-    "statusCode": 200,
-    "msg": "success",
-    "data": {
-        "resource_id": "b6519605-6132-4ba5-9039-cec0f7fc9fe3", // 资源id
-        "resource_name": "meeting", // 资源名称
-        "type": "dir", // 资源类型
-        "creator_id": "5c397e61-ee45-4af1-b094-4363b5fdf305", // 创建者id
-        "created_at": "2019-07-01 19:51:08" // 创建时间
-    }
-}
-```
-
-
-
-#### D3.修改资源元数据
-
-[PUT] /v1/resources/{resource_id}
-
-* resource_id: 资源id
+[POST] /v1/dirs
 
 Request Body
 
 ```json
 {
-    "resource_name": "meeting" // 资源名称
+	"cur_id": "e911f136-35ad-416a-b195-7b1fad4bd7f1 " // 当前所在目录id
 }
+
 ```
 
 Response Body
 
 ```json
 {
-    "statusCode": 200,
-    "msg": "success",
-    "data": null
+  "status": 200,
+  "msg": "OK",
+  "data": {
+    "id": "afb502c2-d769-442b-be61-90b2a48d00a3",
+    "title": "未命名",
+    "thumbnail": "./assets/images/docCnt.png",
+    "root": 0,
+    "home": 0,
+    "personal": 0,
+    "modifiable": 1,
+    "creator_id": "e1f5f562-2e96-4b3e-a6ff-e3f953c5b368",
+    "created_at": "2019-07-15T12:48:45.099+0000"
+  }
 }
+
 ```
 
-#### D4.删除资源
+##### D1.1 新建文档
 
-[DELETE] /v1/resources/{resource_id}
+[POST] /v1/docs
 
-* resource_id: 资源id
+Request Body
+
+```
+{
+    "cur_id": "e911f136-35ad-416a-b195-7b1fad4bd7f1"
+}
+
+```
 
 Response Body
 
 ```json
 {
-    "statusCode": 200,
-    "msg": "success",
-    "data": null   
+  "status": 200,
+  "msg": "OK",
+  "data": {
+    "id": "3123956c-2284-40ef-9c7e-7d1982d5b9a4",
+    "title": "未命名",
+    "thumbnail": "./assets/images/doc.png",
+    "creator_id": "e1f5f562-2e96-4b3e-a6ff-e3f953c5b368",
+    "created_at": "2019-07-16T12:30:41.020+0000"
+  }
 }
+
 ```
 
-#### D5.获取下级目录或挂载文档
 
-[GET] /v1/resources/{resource_id}/slaves
 
-* resource_id: 资源id
+#### D2.获取资源元数据
+
+##### D2.1 获取目录元数据 
+
+[GET] /v1/dirs/{dir_id}
+
+- dir_id: 目录id
 
 Response Body
 
 ```json
 {
-    "statusCode": 200,
-    "msg": "success",
-    "data": [
-        {
-            "resource_id": "573d9b62-9e07-430c-b2a0-4825fbccc785", // 资源id
-            "resource_name": "七月例会", // 资源名称
-            "type": "dir", // 资源类型
-            "creator": "小组长", // 创建者名称
-            "created_at": "2019-07-01 09:21:28" // 创建时间
-        },
-        {
-            "resource_id": "627f3add-e93a-435d-bd39-2f8023253f35",
-            "resource_name": "八月例会",
-            "type": "dir",
-            "creator": "小组长",
-            "created_at": "2019-08-01 09:30:21"
-        }
-    ]
+  "status": 200,
+  "msg": "OK",
+  "data": {
+    "id": "afb502c2-d769-442b-be61-90b2a48d00a3",
+    "title": "测试目录",
+    "thumbnail": "./assets/images/docCnt.png",
+    "root": 0,
+    "home": 0,
+    "personal": 0,
+    "modifiable": 1,
+    "creator_id": "e1f5f562-2e96-4b3e-a6ff-e3f953c5b368",
+    "created_at": "2019-07-15T12:48:45.099+0000"
+  }
 }
+
 ```
 
+##### D2.2 获取文档元数据
 
-
-#### D6.获取对该资源有操作权限的群组信息
-
-[GET] /v1/resources/{resource_id}/authgroups
-
-* resource_id: 资源id
-
-Response Body
-
-```json
-{
-    "statusCode": 200,
-    "msg": "success",
-    "data": [
-        {
-            "group_id": "b64b725b-ef13-4e3f-9d98-ddb3152981a6", // 群组id
-            "group_name": "manager", // 群组名称
-            "permission": "111" // 权限
-        }
-    ]
-}
-```
-
-#### D7.获取文档Meta
-
-[GET] `/v1/docs/{doc_id}`
+[GET] `/docs/{doc_id}`
 
 ```http
-GET /v1/docs/1
+GET /docs/1
+
 ```
 
 Response Body
@@ -1138,14 +1126,44 @@ Response Body
         "modified_time": "2019-07-05 23:10:00"
     }
 }
+
 ```
 
-#### D8.更新文档Meta
+#### D3.更新资源元数据
 
-[PATCH] `/v1/docs/{doc_id}`
+##### D3.1 更新目录名称
+
+[PATCH] /v1/dirs/{dir_id}
+
+- dir_id: 目录id
+
+Request Body
+
+```json
+{
+    "title": "meeting", // 资源名称
+}
+
+```
+
+Response Body
+
+```json
+{
+    "statusCode": 200,
+    "msg": "success",
+    "data": null
+}
+
+```
+
+##### D3.2 更新文档元数据
+
+[PATCH] `/docs/{doc_id}`
 
 ```http
-PATCH /v1/files/1
+PATCH /files/1
+
 ```
 
 Request Body
@@ -1155,6 +1173,7 @@ Request Body
     "title": "code",
     "desc": "代码仓库"
 }
+
 ```
 
 Response Body
@@ -1178,7 +1197,90 @@ Response Body
         "modified_time": "2019-07-05 23:10:00"
     }
 }
+
 ```
+
+#### D4.删除资源
+
+##### D4.1 删除目录
+
+[DELETE] /v1/dirs/{dir_id}
+
+- dir_id: 目录id
+
+Response Body
+
+```json
+{
+    "statusCode": 200,
+    "msg": "success",
+    "data": null   
+}
+
+```
+
+##### D4.2 删除文档
+
+[DELETE] /v1/docs/{dir_id}
+
+- doc_id: 文档id
+
+Response Body
+
+```json
+{
+    "statusCode": 200,
+    "msg": "success",
+    "data": null   
+}
+
+```
+
+#### D5.获取下级资源
+
+##### D5.1 获取指定目录下的子目录或文档
+
+[GET] /v1/dirs/{dir_id}/slaves
+
+- dir_id: 目录id
+
+Response Body
+
+```json
+{
+  "status": 200,
+  "msg": "OK",
+  "data": [
+    {
+      "created_time": "2019-07-16T12:06:18.398+0000",
+      "thumbnail": "./assets/images/docCnt.png",
+      "creator": "e1f5f562-2e96-4b3e-a6ff-e3f953c5b368",
+      "id": "e65439e3-5d38-4a52-b700-bc28d666d098",
+      "type": "dir",
+      "title": "未命名"
+    },
+    {
+      "created_time": "2019-07-16T12:17:05.634+0000",
+      "thumbnail": "./assets/images/docCnt.png",
+      "creator": "e1f5f562-2e96-4b3e-a6ff-e3f953c5b368",
+      "id": "2e9e2804-cf39-4980-bc0d-be295032a721",
+      "type": "dir",
+      "title": "未命名"
+    },
+    {
+      "created_time": "2019-07-16T12:30:41.020+0000",
+      "thumbnail": "./assets/images/doc.png",
+      "creator": "e1f5f562-2e96-4b3e-a6ff-e3f953c5b368",
+      "id": "3123956c-2284-40ef-9c7e-7d1982d5b9a4",
+      "type": "doc",
+      "title": "未命名"
+    }
+  ]
+}
+
+```
+
+##### D5.2 获取指定文档下的文件
 
 ### 文件模块
 
@@ -1193,6 +1295,7 @@ Request Body:
     "ext" : "", // 准备上传文件的拓展名
     "cur_id": "" //为上传到逻辑文档的 uuid
 }
+
 ```
 
 Response Body:  
@@ -1213,7 +1316,9 @@ Response Body:
         "creator": "" //创建者id
     }
 }
+
 ```
+
 #### F2.获取签名URL（针对于使用Minio实施的项目）
 
 [POST] /v1/files/url
@@ -1225,6 +1330,7 @@ Request Body:
     "ext" : "", // 准备上传文件的拓展名
     "cur_id": "" //为上传到逻辑文档的 uuid
 }
+
 ```
 
 Response Body: 
@@ -1237,6 +1343,7 @@ Response Body:
         "url" : "" // 后续使用 PUT 方法上传文件
     }
 }
+
 ```
 
 #### F3. 文件直传 oss（针对阿里云 oss 实施）
@@ -1263,6 +1370,7 @@ Request Body:
     "signature": "",  //获取policy请求返回的signature字段
     "file": (binary)  //所上传文件的二进制文件
 }
+
 ```
 
 Response Body:  
@@ -1271,13 +1379,14 @@ Response Body:
 {
     "Status": "OK"
 }
+
 ```
 
 #### F4. 文件直传 oss（针对 Minio 实施）
 
 [PUT] **host**
 
-* 此处的 host 是获取 A2 接口返回 body 中的 url 字段
+- 此处的 host 是获取 A2 接口返回 body 中的 url 字段
 
 Request Body: 
 
@@ -1285,13 +1394,14 @@ Request Body:
 {
 	"file": (binary)  //所上传文件的二进制文件
 }
+
 ```
 
-#### F5. 创建文件Meta（上传文件成功后Callback接口）
+#### F5. 上传文件成功后创建Meta（Callback接口）
 
 [POST] /v1/files/{id}
 
-* id: 文件id
+- id: 文件id
 
 Request Body:
 
@@ -1305,6 +1415,7 @@ Request Body:
     "creator": "", // 文件的创建者
    	"size": "" // 文件的大小
 }
+
 ```
 
 Response Body:
@@ -1315,6 +1426,7 @@ Response Body:
     "msg": "success",
     "data": null
 }
+
 ```
 
 #### F6. 删除文件
@@ -1327,6 +1439,7 @@ Request Body:
 {
 	"file_id":["","",""] //删除的文件id
 }
+
 ```
 
 Response Body:
@@ -1337,13 +1450,14 @@ Response Body:
 	"msg": "success",
 	"data": null
 }
+
 ```
 
 #### F7. 下载文件 
 
 [GET] /v1/files/​{file_id}/download
 
-* id: 为下载文件的file_id
+- id: 为下载文件的file_id
 
 Response Body: HttpServletResponse
 
@@ -1351,7 +1465,7 @@ Response Body: HttpServletResponse
 
 [GET] /v1/files/​{file_id}/versions
 
-* file_id: 为下载文件的file_id
+- file_id: 为下载文件的file_id
 
 Response Body:
 
@@ -1376,16 +1490,18 @@ Response Body:
 		]
 	}
 }
+
 ```
 
-#### F9.获取文件Meta
+#### F9.获取文件meta
 
-获取文件meta
+Retrieve File Meta
 
-[GET] `/v1/files/{file_id}`
+[GET] `/files/{file_id}`
 
 ```http
-GET /v1/files/1
+GET /files/1
+
 ```
 
 Response Body
@@ -1424,16 +1540,20 @@ Response Body
     "original_id": "10432347",
     "parent_id": null
 }
+
 ```
 
-#### F10.更新文件Meta
+#### F10.更新文件meta
+
+Update File Meta
 
 > 部分更新，仅可更新部分字段
 
-[PATCH] `/v1/files/{file_id}`
+[PATCH] `/files/{file_id}`
 
 ```http
-PATCH /v1/files/1
+PATCH /files/1
+
 ```
 
 Request Body
@@ -1458,6 +1578,7 @@ Request Body
         24310
     ]
 }
+
 ```
 
 Response Body
@@ -1500,13 +1621,16 @@ Response Body
         "parent_id": null
     }
 }
+
 ```
 
-#### F11.创建类目或标签
+#### F11.增加标签或类目
 
-[POST] `/v1/tags/`
+Create Tag / Category
 
-[POST] `/v1/categories/`
+[POST] `/tags/`
+
+[POST] `/categories/`
 
 Request Body
 
@@ -1515,6 +1639,7 @@ Request Body
     "title": "算法",
     "desc": "......"
 }
+
 ```
 
 Response Body
@@ -1529,16 +1654,20 @@ Response Body
         "desc": "......"
     }
 }
+
 ```
 
-#### F12.获取类目或标签
+#### F12.检索标签或类目
 
-[GET] `/v1/tags/{tag_id}`
+Retrieve Tag / Category
 
-[GET] `/v1/categories/{category_id}`
+[GET] `/tags/{tag_id}`
+
+[GET] `/categories/{category_id}`
 
 ```http
-GET /v1/tags/1
+GET /tags/1
+
 ```
 
 Response Body
@@ -1553,16 +1682,20 @@ Response Body
         "desc": "......"
 	}
 }
+
 ```
 
-#### F13. 更新类目或标签
+#### F13. 更新标签或类目、
 
-[PUT] `/v1/tags/{tag_id}`
+Update Tag / Category
 
-[PUT] `/v1/categories/{category_id}`
+[PUT] `/tags/{tag_id}`
+
+[PUT] `/categories/{category_id}`
 
 ```http
-PUT /v1/tags/1
+PUT /tags/1
+
 ```
 
 Request Body
@@ -1572,6 +1705,7 @@ Request Body
     "title": "算法",
     "desc": "......"
 }
+
 ```
 
 Response Body
@@ -1586,17 +1720,20 @@ Response Body
         "desc": "......"
     }
 }
+
 ```
 
+#### F14.删除标签或类目
 
-#### F14.删除类目或标签
+Delete Tag / Category
 
-[DELETE] `/v1/tags/{tag_id}`
+[DELETE] `/tags/{tag_id}`
 
-[DELETE] `/v1/categories/{category_id}`
+[DELETE] `/categories/{category_id}`
 
 ```http
-DELETE /v1/tags/1
+DELETE /tags/1
+
 ```
 
 Response Body
@@ -1607,16 +1744,20 @@ Response Body
     "msg": "OK",
     "data": null
 }
+
 ```
 
-#### F15.获取文件的类目或标签
+#### F15.获取标签或类目
 
-[GET] `/v1/files/{file_id}/tags`
+Get File Tags / Categories
 
-[GET] `/v1/files/{file_id}/categories`
+[GET] `/files/{file_id}/tags`
+
+[GET] `/files/{file_id}/categories`
 
 ```http
-GET /v1/files/1/tags
+GET /files/1/tags
+
 ```
 
 Response Body
@@ -1650,16 +1791,20 @@ Response Body
       }
     ]
 }
+
 ```
 
-#### F16.更新文件的类目或标签
+#### F16.更新文件标签或类目
 
-[PUT] `/v1/files/{file_id}/tags`
+Update File Tags / Categories
 
-[PUT] `/v1/files/{file_id}/categories`
+[PUT] `/files/{file_id}/tags`
+
+[PUT] `/files/{file_id}/categories`
 
 ```http
-PUT /v1/files/1/tags
+PUT /files/1/tags
+
 ```
 
 Request Body
@@ -1668,6 +1813,7 @@ Request Body
 {
     "tags": [1, 2, 3]
 }
+
 ```
 
 Response Body
@@ -1678,14 +1824,16 @@ Response Body
     "msg": "OK",
     "data": null
 }
+
 ```
 
 ### 权限模块
 
-#### F1.授予群组对指定目录或文档的操作权限
+#### P1.添加群组对指定目录或文档的操作权限	
+
 [POST] /v1/resources/{resource_id}/permissions
 
-* resource_id: 资源id
+- resource_id: 资源id
 
 Request Body
 
@@ -1693,11 +1841,12 @@ Request Body
 {
     "permission": "100", // 权限
     // 群组id列表
-    "groupsIdList": [
+    "groups": [
         "b64b725b-ef13-4e3f-9d98-ddb3152981a6",
         "b57a392d-6510-4116-99db-f76cc16a78e5"
     ]
 }
+
 ```
 
 Response Body
@@ -1708,14 +1857,16 @@ Response Body
     "msg": "success",
     "data": null
 }
+
 ```
 
 
 
-#### F2.撤销群组对指定目录或文档的操作权限
+#### P2.撤销群组对指定目录或文档的操作权限
+
 [DELETE] /v1/resources/{resource_id}/permissions
 
-* resource_id: 资源id
+- resource_id: 资源id
 
 Request Body
 
@@ -1723,6 +1874,7 @@ Request Body
 {
     "group_id": "b57a392d-6510-4116-99db-f76cc16a78e5" // 群组id
 }
+
 ```
 
 Response Body
@@ -1733,5 +1885,68 @@ Response Body
     "msg": "success",
     "data": null
 }
+
+```
+
+#### P3.获取对指定资源有操作权限的群组信息
+
+[GET] /v1/resources/{resource_id}/authgroups
+
+- resource_id: 资源id
+
+Response Body
+
+```json
+{
+  "status": 200,
+  "msg": "OK",
+  "data": {
+    "isOwner": 1,
+    "groupList": [
+      {
+        "permission": "100",
+        "groupInfo": {
+          "group_id": "75895fa6-9054-49cf-8db2-08312f1766d8",
+          "group_name": "巴萨球迷",
+          "group_desc": "巴萨是最菜的",
+          "creator_id": "e1f5f562-2e96-4b3e-a6ff-e3f953c5b368",
+          "created_at": "2019-07-09T17:05:39.321+0000",
+          "personal": 0
+        }
+      }
+    ]
+  }
+}
+
+```
+
+#### P4.获取群组具有操作权限的所有资源信息
+
+[GET] /v1/groups/{group_id}/authresources
+
+- group_id: 群组id
+
+Response Body
+
+```json
+{
+    "statusCode": 200,
+    "msg": "success",
+    "data": {
+        "resourceList": [
+           {
+        	"resourceInfo": {
+            	"resource_id": "b64b725b-ef13-4e3f-9d98-ddb3152981a6", // 资源id
+            	"resouce_name": "manager", // 资源名称
+            	"desc": "", // 资源描述
+            	"creator_id": "", // 创建者id
+            	"created_at": "", // 创建时间
+            },
+            "permission": "111" // 权限
+          }
+    	]
+    }
+}
+
 ```
 
