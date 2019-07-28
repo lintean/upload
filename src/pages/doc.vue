@@ -46,10 +46,15 @@
         >{{document.title}}</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
-    
+
     <div class="light_divider"></div>
     <!-- 显示目录和文档 -->
-    <div style="display: flex; justify-content: flex-start; margin: 10px 0; flex-wrap: wrap;">
+    <div
+      v-loading="cardLoading"
+      element-loading-spinner="el-icon-loading"
+      element-loading-text="加载中 请稍后"
+      style="display: flex; justify-content: flex-start; margin: 10px 0; flex-wrap: wrap;"
+    >
       <resource-card
         v-for="(doc, index) in docList"
         :key="index"
@@ -94,6 +99,7 @@ import DirMeta from "../components/DirMeta.vue";
 import FileMeta from "../components/FileMeta.vue";
 import Upload from "../components/upload.vue";
 import * as DEFAULT from "../json/default";
+import { Message, Loading } from "element-ui";
 
 // click dblclick 冲突计时器
 var time = null;
@@ -111,7 +117,9 @@ export default {
       // 下部
       // 点击交互
       currentItemClicked: -1,
-      // 点击限制
+      // 点击限制 防止后端响应太慢 出现返回数据的顺序错误
+      // 但是这个会导致 后端响应慢时 其一直为真假 用户体验很差
+      // 目前注释掉赋值为假语句 使其一直为真
       clickReady: true,
 
       // 当前目录信息
@@ -126,12 +134,15 @@ export default {
       dirMetaInit: DEFAULT.dirMetaI,
       // 文件下载
       downloadUrl: "",
-      downloadName: ""
+      downloadName: "",
+      //文件点击后的loading动画
+      cardLoading: false
     };
   },
   computed: {
     ...mapState(["pathBackup", "currentResourceBackup"])
   },
+  //用的自定义组件
   components: {
     "resource-card": ResourceCard,
     "group-and-permission": GroupNPermission,
@@ -149,13 +160,21 @@ export default {
     });
   },
   mounted: function() {
-    console.log(this.currentResource.id);
-    if (this.currentResourceBackup != null)
-      this.currentResource.id = this.currentResourceBackup.id;
+    // console.log("mounted: ",this.$store.state.idOfThePathJust)
+    // console.log("mounted: ",this.$store.state.typeOfThePathJust)
 
+    if (
+      this.currentResourceBackup != null &&
+      this.$store.state.idOfThePathJust != null
+    ) {
+      //设置 当前页面资源的id
+      this.currentResource.id = this.$store.state.idOfThePathJust;
+      this.currentResource.type = this.$store.state.typeOfThePathJust;
+    }
     if (this.currentResource.id != null) {
       this.path = this.pathBackup;
       this.itemDBClicked(-1);
+      // this.refreshResource();
     }
   },
   methods: {
@@ -183,8 +202,8 @@ export default {
         return;
       }
       clearTimeout(time); //清除
-      console.log("双击");
-      this.clickReady = false;
+      console.log("双击", index);
+      // this.clickReady = false;
       this.currentItemClicked = index;
 
       // 根据id刷新当前目录
@@ -195,6 +214,9 @@ export default {
       else this.goToNext();
     },
     refreshResource() {
+      // console.log("refreshResource");
+      // console.log("refreshResource", this.currentResource.id);
+
       let _this = this;
       Api.getResources(this.currentResource.type, this.currentResource.id)
         .then(res => {
@@ -221,14 +243,21 @@ export default {
             _this.handleResource(res);
           } else {
             _this.handleError(err);
+            Message.warning(res.data.status);
           }
         })
         .catch(err => {
-          _this.handleError(err);
+          // _this.handleError(err);
+          Message.error("刷新失败 " + err.response.status);
         });
     },
+
     backToUpper() {
+      // console.log("backToUpper()", this.docList[this.currentItemClicked].id);
       let _this = this;
+      //加载动画
+      this.cardLoading = true;
+
       Api.getResources(
         this.docList[this.currentItemClicked].type,
         this.docList[this.currentItemClicked].id
@@ -242,6 +271,16 @@ export default {
 
             // 更新路径
             _this.path.pop();
+
+            //更新 这个很low的id 用于 从其他页面返回后 还能到达跳转到之前的界面
+            this.$store.commit(
+              "setIdOfThePathJust",
+              this.docList[this.currentItemClicked].id
+            );
+            this.$store.commit(
+              "setTypeOfThePathJust",
+              this.docList[this.currentItemClicked].type
+            );
 
             // 更新资源列表
             _this.docList.splice(0, _this.docList.length);
@@ -257,19 +296,23 @@ export default {
                 isEditStatus: false
               });
             }
-
+             _this.cardLoading = false;
             // 处理结果(统一部分)
             _this.handleResource(res);
           } else {
-            _this.$message.error(res.data.msg);
+            Message.error(res.data.msg);
           }
         })
         .catch(err => {
-          _this.handleError(err);
+          // _this.handleError(err);
+          Message.error("操作失败 请先登陆或刷新");
         });
     },
     goToNext() {
       let _this = this;
+      this.cardLoading = true;
+
+      // console.log("goToNext", this.docList[this.currentItemClicked].id);
       Api.getResources(
         this.docList[this.currentItemClicked].type,
         this.docList[this.currentItemClicked].id
@@ -282,6 +325,16 @@ export default {
             _this.isCurrentFileLayout =
               _this.docList[_this.currentItemClicked].type == "doc";
             _this.currentResource = this.docList[this.currentItemClicked];
+
+            //更新 这个很low的id 用于 从其他页面返回后 还能到达跳转到之前的界面
+            this.$store.commit(
+              "setIdOfThePathJust",
+              this.docList[this.currentItemClicked].id
+            );
+            this.$store.commit(
+              "setTypeOfThePathJust",
+              this.docList[this.currentItemClicked].type
+            );
 
             // 更新路径
             _this.path.push(_this.docList[_this.currentItemClicked]);
@@ -298,18 +351,24 @@ export default {
               id: parent_id,
               isEditStatus: false
             });
-
-            // 处理结果(统一部分)
-            _this.handleResource(res);
+            //结束loading动画
+            _this.cardLoading = false;
+              // 处理结果(统一部分)
+              _this.handleResource(res);
           } else {
-            _this.$message.error(res.data.msg);
+            Message.error(res.data.msg);
           }
         })
         .catch(err => {
-          _this.handleError(err);
+          // console.log("goToNext")
+          Message.error("操作失败 请先登陆或刷新");
+          // _this.handleError(err);
         });
     },
+
     handleResource(res) {
+      // console.log("handleResource", res.data.data.length);
+
       for (let i = 0; i < res.data.data.length; ++i) {
         if (res.data.data[i].thumbnail == "./assets/images/docCnt.png")
           res.data.data[
@@ -318,7 +377,7 @@ export default {
         if (res.data.data[i].thumbnail == "./assets/images/doc.png")
           res.data.data[i].thumbnail_url = require("../assets/images/doc.png");
         if (res.data.data[i].thumbnail_url == null) {
-          this.$message.warning("缩略图生成中");
+          Message.warning("缩略图生成中");
           res.data.data[i].thumbnail_url = require("../assets/images/file.png");
         }
         res.data.data[i].isEditStatus = false;
@@ -364,6 +423,8 @@ export default {
           }
         })
         .catch(err => {
+          console.log("downloadFile");
+
           _this.handleError(err);
         });
     },
@@ -396,12 +457,16 @@ export default {
               id: temp.resource_id,
               title: temp.resource_name
             });
-            _this.$message.warning("新建成功");
+            Message.success("新建成功");
+            //刷新资源界面
+            _this.refreshResource();
           } else {
-            _this.$message.error(res.data.msg);
+            Message.error(res.data.msg);
           }
         })
         .catch(err => {
+          // console.log("newResource");
+
           _this.handleError(err);
         });
     },
@@ -422,10 +487,10 @@ export default {
               _this.docList.splice(_this.currentItemClicked, 1);
               _this.currentItemClicked = -1;
               //   console.log("删除成功");
-              _this.$message.warning("删除成功");
+              Message.success("删除成功");
             } else {
-              // _this.$message.error(res.data.msg);
-              _this.$message.warning("删除失败 后台无法连接");
+              // Message.error(res.data.msg);
+              Message.warning("删除失败 后台无法连接");
               //   console.log(4);
             }
           });
@@ -437,7 +502,7 @@ export default {
           // }
         })
         .catch(() => {
-          _this.$message.warning("已取消删除");
+          Message.warning("取消删除");
         });
     },
     deleteFile() {
@@ -453,9 +518,9 @@ export default {
             res => {
               if (res.data.status === 200) {
                 _this.docList.splice(_this.currentItemClicked, 1);
-                _this.$message.warning("删除成功");
+                Message.success("删除成功");
               } else {
-                _this.$message.warning("删除失败 后台无法连接");
+                Message.warning("删除失败 后台无法连接");
               }
             }
           );
@@ -465,7 +530,7 @@ export default {
           // }
         })
         .catch(() => {
-          _this.$message.warning("已取消删除");
+          Message.warning("取消删除");
         });
     },
     getKeyword(keyword, cb) {
@@ -483,10 +548,12 @@ export default {
             }
             cb(searchSuggestions);
           } else {
-            _this.$message.error(res.data.msg);
+            Message.error(res.data.msg);
           }
         })
         .catch(err => {
+          console.log("getKeyword");
+
           _this.handleError(err);
         });
     },
@@ -509,11 +576,14 @@ export default {
       });
     },
     turnToPast(index) {
+      //如果是路径的最后一个  啥也不动
+      if (index == this.path.length - 1) return;
       let temp = this.path[index];
       // 目录信息
       this.currentResource.id = temp.id;
       this.currentResource.title = temp.title;
       this.currentResource.type = "dir";
+      // this.currentResource.type = this.$store.state.typeOfThePathJust;
 
       let length = this.path.length;
       for (let i = index + 1; i < length; ++i) {
@@ -547,7 +617,7 @@ export default {
     },
     handleError(err) {
       console.log(err);
-      this.$message.warning(DEFAULT.defaultNetwordError);
+      Message.warning(DEFAULT.defaultNetwordError);
     }
   }
 };

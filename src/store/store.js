@@ -16,8 +16,19 @@ export default new Vuex.Store({
 		fileMetaVisible: false,
 		changeNameVisible: false,
 		uploadVisiable: false,
+
+		//这个值用于 从其他页面返回后 还能到达跳转前的界面
+		idOfThePathJust:null,
+		typeOfThePathJust:null,
 	},
 	mutations: {
+		setIdOfThePathJust(state, id){
+			state.idOfThePathJust = id;
+		},
+		setTypeOfThePathJust(state, type){
+			state.typeOfThePathJust = type;
+		},
+		
 		setPathBackup(state, payload) {
 			state.pathBackup = payload.pathBackup;
 		},

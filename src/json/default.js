@@ -26,12 +26,12 @@ export const docs = [{
 	"thumbnail_url": require("../assets/back.png"), //缩略图
 	"resource_type": "doc", // 资源类型
 	"creator": "", // 创建者id
-	"created_time": "2019-07-01 09:21:28" // 创建时间
+	"created_time": "****-**-** **:**:**" // 创建时间
 }];
 
 export const dirMetaI = {
 	"title": "目录名",
-	"created_time": "2019.07.19"
+	"created_time": "****.**.**"
 }
 
 export const defaultResource = {
@@ -40,7 +40,7 @@ export const defaultResource = {
 	"thumbnail_url": require("../assets/back.png"),
 	"type": "dir",
 	"creator": "",
-	"created_time": "2019-07-01 09:21:28"
+	"created_time": "**-**-** **:**:**"
 }
 
 export const fm = {

@@ -1,5 +1,5 @@
 <template>
-	<a-drawer title="目录属性" width=420 :closable="false" @close="close" :visible="dirMetaVisible">
+	<a-drawer title="目录属性" width=360 :closable="false" @close="close" :visible="dirMetaVisible">
 		<el-row style="margin-top: 10px;">
 			<el-col :offset="1" :span="5" style="text-align: right;">目录名：</el-col>
 			<el-col :offset="2" :span="16">

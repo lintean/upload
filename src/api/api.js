@@ -11,13 +11,17 @@ axios.defaults.withCredentials = true;
 // export const baseUrl = "http://192.168.43.211:8089/v1";
 // export const baseUrl = "http://192.168.43.211:8080/v1";
 // export const baseUrl = "http://localhost:8080/v1";
-export const baseUrl = "http://39.108.210.48:8089/v1";
-// export const baseUrl = "http://39.108.210.48:18090/v1";
 // export const baseUrl = "http://localhost/v1";
+//douban库
+export const baseUrl = "http://39.108.210.48:8089/v1";
+//legal库
+// export const baseUrl = "http://39.108.210.48:18090/v1";
+
 
 // 用户模块
 // U1	新建用户
 export const newUser = (work_no, username,password,email) => {
+	// console.log( work_no, username,password,email);
 	return new axios({
 		url: baseUrl + '/users',
 		data: {

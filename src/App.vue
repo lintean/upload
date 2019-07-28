@@ -1,7 +1,7 @@
 <template>
   <div id="app">
-    <el-container>
-      <el-aside style="width: 180px !important;">
+    <el-container >
+      <el-aside style="width: 180px !important;" >
         <a-menu
           :selectedKeys="selectedKeys"
           :defaultOpenKeys="['sub1']"
@@ -146,6 +146,7 @@
 <script>
 import * as Api from "./api/api";
 import * as DEFAULT from "./json/default";
+import { Message } from "element-ui";
 
 export default {
   name: "app",
@@ -230,7 +231,8 @@ export default {
     };
   },
   mounted: function() {
-	  //从这里初始化
+    // created: function() {
+    //从这里初始化
     // 判断是否是手机访问
     this.phone = this.isPhone();
 
@@ -244,17 +246,26 @@ export default {
         // console.log("getUser:", res);
         if (res.data.status === 200) {
           _this.recordLoginData(res);
-          _this.$message.warning("获取用户数据 成功");
+          Message({
+            message: "获取用户数据 成功 ",
+            center: true,
+            type: "success",
+            showClose: true,
+            customClass: "zZindex"
+          });
         } else {
           _this.loginData.visible = true;
         }
       })
       .catch(err => {
         _this.loginData.visible = true;
-        _this.$message.warning("获取用户数据 失败");
-        _this.$message.warning("请先登陆");
-
-        console.log("err");
+        Message({
+          message: "请先登陆",
+          center: true,
+          type: "warning",
+          showClose: true,
+          customClass: "zZindex"
+        });
       });
 
     this.changeKeys(window.location.hash);
@@ -315,26 +326,42 @@ export default {
       //调用接口 用户登陆
       Api.Login(this.loginData.user, this.loginData.pwd)
         .then(res => {
-        //   console.log("Login：", res);
+          //   console.log("Login：", res);
           if (res.data.status === 200) {
             _this.recordLoginData(res);
             _this.loginData.visible = false;
-            _this.$message.warning("用户登陆 成功");
+            Message({
+              message: "用户登陆 成功",
+              center: true,
+              type: "success",
+              showClose: true,
+              customClass: "zZindex"
+            });
           } else {
-            _this.$message.error(res.data.msg);
+            Message({
+              message: res.data.msg,
+              center: true,
+              type: "warning",
+              showClose: true,
+              customClass: "zZindex"
+            });
           }
         })
         .catch(err => {
-          //   _this.handleError(err);
-          _this.$message.warning("用户登陆 失败");
-          _this.$message.warning("账号密码不正确");
-
           console.log(err);
+          Message({
+            message: "账号密码不正确 " + err.response.status,
+            center: true,
+            type: "warning",
+            showClose: true,
+            customClass: "zZindex"
+          });
         });
     },
     registered() {
       let _this = this;
       //掉用接口 用户注册
+
       Api.newUser(
         this.registeredData.work_no,
         this.registeredData.username,
@@ -342,18 +369,34 @@ export default {
         this.registeredData.email
       )
         .then(res => {
-        //   console.log("registered：", res);
+          //   console.log("registered：", res);
           if (res.data.status === 200) {
             this.registeredData.visible = false;
-            _this.$message.warning("用户注册 成功");
+            Message({
+              message: "用户注册 成功",
+              center: true,
+              type: "success",
+              showClose: true,
+              customClass: "zZindex"
+            });
           } else {
-            _this.$message.error(res.data.msg);
+            Message({
+              message: res.data.msg,
+              center: true,
+              type: "warning",
+              showClose: true,
+              customClass: "zZindex"
+            });
           }
         })
         .catch(err => {
-          //   _this.handleError(err);
-          _this.$message.warning("用户注册 失败");
-          //   _this.$message.warning("账号密码不正确");
+          Message({
+            message: "用户注册 失败 " + err.response.status,
+            center: true,
+            type: "warning",
+            showClose: true,
+            customClass: "zZindex"
+          });
           console.log(err);
         });
     },
@@ -362,18 +405,30 @@ export default {
       //调用接口 注销登陆
       Api.Logout()
         .then(res => {
-        //   console.log("Logout：", res);
+          //   console.log("Logout：", res);
 
           if (res.data.status === 200) {
             _this.loginData.isLogin = false;
             _this.loginData.visible = true;
-            _this.$message.warning("注销登陆 成功");
+            Message({
+              message: "注销登陆 成功",
+              center: true,
+              type: "success",
+              showClose: true,
+              customClass: "zZindex"
+            });
           } else {
             alert(res.data.msg);
           }
         })
         .catch(err => {
-          _this.$message.warning("注销登陆 失败");
+          Message({
+            message: "注销登陆 失败",
+            center: true,
+            type: "warning",
+            showClose: true,
+            customClass: "zZindex"
+          });
           _this.handleError(err);
         });
     },
@@ -413,41 +468,57 @@ export default {
     },
     handleError(err) {
       console.log(err);
-      this.$message.warning(DEFAULT.defaultNetwordError);
-	},
-	
+      Message({
+        message: DEFAULT.defaultNetwordError,
+        center: true,
+        type: "success",
+        showClose: true,
+        customClass: "zZindex"
+      });
+    },
+
     //测试专用 上线请注释
     testApi() {
       let _this = this;
-	//  Api.newGroup('测试5', '测试新建群组5')
-	//  Api.getGroupOfUser()
-	 Api.getGroupMeta("9c54503a-02a2-401d-93c9-f1205d728422")
-	//  Api.updateGroupMeta("1b14d0b6-0054-4244-8685-5106fa3cdb54",'测试3', '测试新建群组3')
-	// Api.deleteGroup("1b14d0b6-0054-4244-8685-5106fa3cdb54")
-	// Api.addUserToGroup("9c54503a-02a2-401d-93c9-f1205d728422",['e1f5f562-2e96-4b3e-a6ff-e3f953c5b368'])
-	// Api.getUserOfGroup("9c54503a-02a2-401d-93c9-f1205d728422")
+      //  Api.newGroup('测试5', '测试新建群组5')
+      //  Api.getGroupOfUser()
+      Api.getGroupMeta("9c54503a-02a2-401d-93c9-f1205d728422")
+        //  Api.updateGroupMeta("1b14d0b6-0054-4244-8685-5106fa3cdb54",'测试3', '测试新建群组3')
+        // Api.deleteGroup("1b14d0b6-0054-4244-8685-5106fa3cdb54")
+        // Api.addUserToGroup("9c54503a-02a2-401d-93c9-f1205d728422",['e1f5f562-2e96-4b3e-a6ff-e3f953c5b368'])
+        // Api.getUserOfGroup("9c54503a-02a2-401d-93c9-f1205d728422")
         .then(res => {
           console.log("返回的数据：", res);
           if (res.data.status === 200) {
-            _this.$message.warning("接口测试 成功");
+            Message.warning("接口测试 成功");
           } else {
-            _this.$message.error(res.data.msg);
+            Message.error(res.data.msg);
           }
         })
         .catch(err => {
-          _this.$message.warning("接口测试 失败");
+          Message.warning("接口测试 失败");
           console.log(err);
         });
-	},
-	
+    },
+
     cancelLogin() {
       this.loginData.visible = false;
-      this.$message.warning("未登录");
-	},
-	
+      Message({
+        message: "未登录",
+        center: true,
+        showClose: true,
+        customClass: "zZindex"
+      });
+    },
+
     cancelRegistered() {
       this.registeredData.visible = false;
-      this.$message.warning("取消注册");
+      Message({
+        message: "取消注册",
+        center: true,
+        showClose: true,
+        customClass: "zZindex"
+      });
     }
   }
 };
@@ -468,5 +539,9 @@ export default {
   position: relative;
   display: block !important;
   background-color: rgba(0, 0, 0, 0.008);
+}
+/* 用于将提示放在最上层 */
+.zZindex {
+  z-index: 3000 !important;
 }
 </style>

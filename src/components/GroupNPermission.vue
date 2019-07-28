@@ -1,5 +1,5 @@
 <template>
-  <a-drawer width="520" :closable="false" @close="close" :visible="groupVisible">
+  <a-drawer width="300" :closable="false" @close="close" :visible="groupVisible">
     <!-- 下拉框：操作 -->
     <div slot="title">
       <span>查看群组</span>
@@ -181,7 +181,11 @@
           ></el-input>
         </el-col>
       </el-row>
-      <el-button type="primary" style="position: relative;margin: 10px 0 0 20px;" @click="handleError('There No Ok')">确认</el-button>
+      <el-button
+        type="primary"
+        style="position: relative;margin: 10px 0 0 20px;"
+        @click="newGroup()"
+      >确认</el-button>
     </a-drawer>
   </a-drawer>
 </template>
@@ -191,7 +195,7 @@
 // 需要后台增添接口
 import { mapState } from "vuex";
 import * as DEFAULT from "../json/default";
-
+import * as Api from "../api/api";
 export default {
   name: "GroupNPermission",
   data() {
@@ -217,6 +221,15 @@ export default {
       },
       groupClickedIndex: 0
     };
+  },
+  watch:{
+    //监听 权限弹窗groupVisible 它为false 删除按钮应该消失
+    groupVisible(){
+      if(this.$store.state.groupVisible==false){
+            this.isDeleteScene = false;
+      };
+    }
+   
   },
   computed: {
     ...mapState(["groupVisible", "currentResourceId"])
@@ -283,6 +296,7 @@ export default {
           }
         })
         .catch(err => {
+           _this.$message.warning("新建失败 " + err.response.status);
           console.log(err);
         });
     },
