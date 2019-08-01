@@ -336,6 +336,7 @@ export default {
         type: "setPathBackup",
         pathBackup: path
       });
+	 
       this.$root.eventHub.$emit("login");
     },
     login() {
