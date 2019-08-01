@@ -54,7 +54,7 @@
               :src="url"
               :page-count="count"
               style="height:auto; width: 100%; margin: 0 auto;"
-            ></show-pdf> -->
+            ></show-pdf>-->
             <Video
               v-if="fileMeta.type == 'video' || fileMeta.type == 'audio '"
               :src="url"
@@ -67,7 +67,6 @@
               <el-image :src="require('../assets/logo.png')" style="width: 200px;"></el-image>
               <h1>该文件类型目前无法预览</h1>
             </div>
-
           </div>
         </div>
       </el-main>
@@ -109,6 +108,7 @@ import * as DEFAULT from "../json/default";
 // import ShowPdf from '../components/ShowPdf.vue'
 // import Video from '../components/Video.vue'
 import * as Download from "../util/download";
+import { Message } from "element-ui";
 
 export default {
   name: "file",
@@ -184,7 +184,7 @@ export default {
       .catch(err => {
         _this.loginData.visible = true;
         console.log(err);
-        _this.$message.warning(DEFAULT.defaultNetwordError);
+        Message.warning(DEFAULT.defaultNetwordError);
       });
   },
   methods: {
@@ -217,12 +217,12 @@ export default {
             _this.recordLoginData(res);
             _this.loginData.visible = false;
           } else {
-            _this.$message.error(res.data.msg);
+            Message.error(res.data.msg);
           }
         })
         .catch(err => {
           console.log(err);
-          _this.$message.warning(DEFAULT.defaultNetwordError);
+          Message.warning(DEFAULT.defaultNetwordError);
         });
     },
     logout() {
@@ -233,12 +233,12 @@ export default {
             _this.loginData.isLogin = false;
             _this.loginData.visible = true;
           } else {
-            _this.$message.error(res.data.msg);
+            Message.error(res.data.msg);
           }
         })
         .catch(err => {
           console.log(err);
-          _this.$message.warning(DEFAULT.defaultNetwordError);
+          Message.warning(DEFAULT.defaultNetwordError);
         });
     },
     getFileMeta() {
@@ -249,7 +249,7 @@ export default {
             _this.fileMeta = res.data.data;
             _this.getUrl();
           } else {
-            _this.$message.error(res.data.msg);
+            Message.error(res.data.msg);
           }
         })
         .catch(err => {
@@ -258,7 +258,7 @@ export default {
     },
     handleError(err) {
       console.log(err);
-      this.$message.warning(DEFAULT.defaultNetwordError);
+      Message.warning(DEFAULT.defaultNetwordError);
     },
     download() {
       let notify = this.$notify({

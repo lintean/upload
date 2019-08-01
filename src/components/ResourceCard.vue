@@ -1,12 +1,24 @@
 <template>
   <el-card :body-style="{ padding: '0px'}">
-    <el-image :src="doc.thumbnail_url" fit="scale-down" alt="fileImage" class="image"></el-image>
-
+    <div class="cardImage"
+    :style="styleCardImage"
+    >
+      <el-image
+        :src="doc.thumbnail_url"
+        fit="scale-down"
+        alt="fileImage"
+        style="width:100%;height: 100%;"
+      >
+      <!-- <div slot="error" class="image-slot">
+        <i class="el-icon-picture-outline">加载失败 无法打开缩略图</i>
+      </div> -->
+      </el-image>
+    </div>
     <div class="divider" style="margin: 0 0 5px 0;"></div>
 
-    <div style="height: 50px; line-height: 50px; text-align: center;" @click="edit">
+    <div class="resCardName" @click="edit">
       <span
-        style="font-size: 14px; height: 50px; line-height: 50px;"
+        class="nameText"
         v-show="!doc.isEditStatus"
       >{{doc.ext != null? doc.title + '.' + doc.ext: doc.title}}</span>
       <el-input
@@ -28,15 +40,15 @@ import * as Api from "../api/api";
 import * as DEFAULT from "../json/default";
 import { Message } from "element-ui";
 
-
 export default {
   name: "ResourceCard",
-  props: ["doc", "index"],
+  //从doc传过来的三个值
+  props: ["doc", "index","styleCardImage"],
   data() {
     return {
       fileEditMeta: {},
       docEditMeta: {},
-      primaryName: ""
+      primaryName: "",
     };
   },
   watch: {
@@ -48,7 +60,7 @@ export default {
           _this.primaryName = _this.doc.title;
         }, 1);
       }
-    }
+    },
   },
   computed: {
     editStatus() {
@@ -167,10 +179,7 @@ export default {
     },
     changeError(err) {
       console.log(err);
-      Message.error("改名失败 "+ err.response.status)
-      // Message.error()
-
-      // Message.warning(DEFAULT.defaultNetwordError);
+      Message.error("改名失败 " + err.response.status);
       this.$parent.stopEditNameByIndex(this.index);
     }
   }
@@ -180,5 +189,19 @@ export default {
 <style>
 .changeName {
   width: 80%;
+}
+.cardImage {
+  width: 150px;
+  height: 150px;
+  display: block;
+  margin: 0 auto;
+}
+.resCardName {
+  /* border: 1px solid rgb(76, 0, 255); */
+  margin-top: 8%;
+  text-align: center;
+}
+.nameText {
+  font-size: 14px;
 }
 </style>

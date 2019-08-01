@@ -20,8 +20,14 @@ export default new Vuex.Store({
 		//这个值用于 从其他页面返回后 还能到达跳转前的界面
 		idOfThePathJust:null,
 		typeOfThePathJust:null,
+
+		//这个值用于 从其他页面返回后 还能到是自己选的图标card大小
+		whatSizeCard:""
 	},
 	mutations: {
+		setwhatSizeCard(state,size){
+			state.whatSizeCard = size;
+		},
 		setIdOfThePathJust(state, id){
 			state.idOfThePathJust = id;
 		},

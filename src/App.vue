@@ -1,7 +1,8 @@
 <template>
   <div id="app">
-    <el-container >
-      <el-aside style="width: 180px !important;" >
+    <!-- 侧边栏 -->
+    <el-container>
+      <el-aside style="width: 13% !important;">
         <a-menu
           :selectedKeys="selectedKeys"
           :defaultOpenKeys="['sub1']"
@@ -33,31 +34,41 @@
 
       <el-container>
         <el-header
-          style="height:60px; line-height: 60px; box-shadow: 0px 5px 6px 0 rgba(0,0,0,.05);"
+          style="position: fixed;    z-index: 999;background-color: white;height: 60px;margin-left: 24px;width: 80%; line-height: 60px; "
         >
           <el-image
             :src="require('./assets/logo.png')"
             style="height: 50px; width: 240px; padding: 5px 0; float: left;"
           ></el-image>
+          <div style="float: right; ">
+            <el-button
+              style="font-size: 16px;"
+              size="mini"
+              type="primary"
+              icon="el-icon-edit-outline"
+              @click="registeredData.visible = true"
+            >注册</el-button>
+          </div>
           <!-- 右上角用户小弹窗 -->
-          <div style="float: right; " v-if="(loginData.isLogin)">
+          <div style="float: right;" v-if="(loginData.isLogin)">
             <el-popover trigger="hover" placement="bottom" width="150">
               <p>欢迎使用 {{loginData.currentUserName}}</p>
               <el-button @click="logout" style="float: right;">注销</el-button>
               <el-button
                 slot="reference"
-                style="font-size: 18px; color: #303133;"
+                style="font-size: 18px; color: #303133;margin-right:24px;"
                 type="text"
                 icon="el-icon-user-solid"
               >{{loginData.currentUserName}}</el-button>
             </el-popover>
           </div>
           <!-- 右上角 登陆按钮 -->
-          <div style="float: right; " v-if="(!loginData.isLogin)">
+          <div style="float: right;" v-if="(!loginData.isLogin)">
             <el-button
-              style="font-size: 16px;"
-              size="small"
+              style="font-size: 16px;margin-right:24px;"
+              size="mini"
               type="danger"
+              icon="el-icon-right"
               @click="loginData.visible = true"
             >登陆</el-button>
           </div>
@@ -66,40 +77,40 @@
         <el-main :style="{minHeight: screenHeight - 120 + 'px'}" class="init">
           <router-view></router-view>
         </el-main>
-        <el-footer
-          style="height: 60px; line-height: 60px; box-shadow: 0px -5px 6px 0px rgba(0,0,0,.05);"
-        >{{footerText}}</el-footer>
+        <el-footer class="footerSize">{{footerText}}</el-footer>
       </el-container>
     </el-container>
 
     <!-- 登陆弹窗 -->
     <el-dialog title="登陆" :visible.sync="loginData.visible" width="400px" style="text-align: left;">
-      <el-image
-        :src="require('./assets/logo.png')"
-        style="height:40px; width: 193px; margin: 0 auto; display: block;"
-      ></el-image>
-      <el-form
-        label-position="right"
-        label-width="80px"
-        style="margin-right: 50px; margin-top: 30px"
-        :model="loginData"
-        :rules="loginData.rules"
-      >
-        <el-form-item label="工号" prop="user">
-          <el-input v-model="loginData.user"></el-input>
-        </el-form-item>
-        <el-form-item label="密码" prop="pwd">
-          <el-input v-model="loginData.pwd" show-password></el-input>
-        </el-form-item>
-      </el-form>
-      <div slot="footer">
-        <el-button
-          type="primary"
-          @click="registeredData.visible = true"
-          style="margin-right: 120px;"
-        >注册</el-button>
-        <el-button @click="cancelLogin">取 消</el-button>
-        <el-button type="primary" @click="login">确 定</el-button>
+      <div v-loading="LoginLoading" element-loading-text="正在登陆">
+        <el-image
+          :src="require('./assets/logo.png')"
+          style="height:40px; width: 193px; margin: 0 auto; display: block;"
+        ></el-image>
+        <el-form
+          label-position="right"
+          label-width="80px"
+          style="margin-right: 50px; margin-top: 30px"
+          :model="loginData"
+          :rules="loginData.rules"
+        >
+          <el-form-item label="工号" prop="user">
+            <el-input v-model="loginData.user"></el-input>
+          </el-form-item>
+          <el-form-item label="密码" prop="pwd">
+            <el-input v-model="loginData.pwd" show-password></el-input>
+          </el-form-item>
+        </el-form>
+        <div slot="footer">
+          <el-button
+            type="primary"
+            @click="registeredData.visible = true"
+            style="margin-right: 120px;"
+          >注册</el-button>
+          <el-button @click="cancelLogin">取 消</el-button>
+          <el-button type="primary" @click="login">确 定</el-button>
+        </div>
       </div>
     </el-dialog>
 
@@ -110,34 +121,37 @@
       width="400px"
       style="text-align: left;"
     >
-      <el-image
-        :src="require('./assets/logo.png')"
-        style="height:40px; width: 193px; margin: 0 auto; display: block;"
-      ></el-image>
-      <el-form
-        label-position="right"
-        label-width="80px"
-        style="margin-right: 50px; margin-top: 30px"
-        :model="registeredData"
-        :rules="registeredData.rules"
-      >
-        <el-form-item label="工号" prop="work_no">
-          <el-input v-model="registeredData.work_no"></el-input>
-        </el-form-item>
-        <el-form-item label="名字" prop="username">
-          <el-input v-model="registeredData.username"></el-input>
-        </el-form-item>
-        <el-form-item label="密码" prop="pwd">
-          <el-input v-model="registeredData.pwd" show-password></el-input>
-        </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="registeredData.email"></el-input>
-        </el-form-item>
-      </el-form>
-      <div slot="footer">
-        <el-button @click="cancelRegistered">取 消</el-button>
-        <el-button type="primary" @click="registered">确 定</el-button>
-        <!-- <el-button @click="registered.visible = true">注册</el-button> -->
+      <div v-loading="RegistLoading" element-loading-text="正在注册">
+        <el-image
+          :src="require('./assets/logo.png')"
+          style="height:40px; width: 193px; margin: 0 auto; display: block;"
+        ></el-image>
+
+        <el-form
+          label-position="right"
+          label-width="80px"
+          style="margin-right: 50px; margin-top: 30px"
+          :model="registeredData"
+          :rules="registeredData.rules"
+        >
+          <el-form-item label="工号" prop="work_no">
+            <el-input v-model="registeredData.work_no"></el-input>
+          </el-form-item>
+          <el-form-item label="名字" prop="username">
+            <el-input v-model="registeredData.username"></el-input>
+          </el-form-item>
+          <el-form-item label="密码" prop="pwd">
+            <el-input v-model="registeredData.pwd" show-password></el-input>
+          </el-form-item>
+          <el-form-item label="邮箱" prop="email">
+            <el-input v-model="registeredData.email"></el-input>
+          </el-form-item>
+        </el-form>
+        <div slot="footer">
+          <el-button @click="cancelRegistered">取 消</el-button>
+          <el-button style="margin-left:210px;" type="primary" @click="registered">确 定</el-button>
+          <!-- <el-button @click="registered.visible = true">注册</el-button> -->
+        </div>
       </div>
     </el-dialog>
   </div>
@@ -146,12 +160,15 @@
 <script>
 import * as Api from "./api/api";
 import * as DEFAULT from "./json/default";
-import { Message } from "element-ui";
+import { Message, Loading } from "element-ui";
 
 export default {
   name: "app",
   data() {
     return {
+      //loading动画
+      LoginLoading: false,
+      RegistLoading: false,
       // 手机端 还未完成
       phone: false,
       screenHeight: 0,
@@ -323,6 +340,7 @@ export default {
     },
     login() {
       let _this = this;
+      _this.LoginLoading = true;
       //调用接口 用户登陆
       Api.Login(this.loginData.user, this.loginData.pwd)
         .then(res => {
@@ -330,6 +348,7 @@ export default {
           if (res.data.status === 200) {
             _this.recordLoginData(res);
             _this.loginData.visible = false;
+            this.LoginLoading = false;
             Message({
               message: "用户登陆 成功",
               center: true,
@@ -349,6 +368,8 @@ export default {
         })
         .catch(err => {
           console.log(err);
+          this.LoginLoading = false;
+
           Message({
             message: "账号密码不正确 " + err.response.status,
             center: true,
@@ -361,7 +382,7 @@ export default {
     registered() {
       let _this = this;
       //掉用接口 用户注册
-
+      _this.RegistLoading = true;
       Api.newUser(
         this.registeredData.work_no,
         this.registeredData.username,
@@ -369,16 +390,17 @@ export default {
         this.registeredData.email
       )
         .then(res => {
-          //   console.log("registered：", res);
+          // console.log("registered：", res.data.status);
           if (res.data.status === 200) {
             this.registeredData.visible = false;
-            Message({
-              message: "用户注册 成功",
-              center: true,
-              type: "success",
-              showClose: true,
-              customClass: "zZindex"
-            });
+            (_this.RegistLoading = false),
+              Message({
+                message: "用户注册 成功",
+                center: true,
+                type: "success",
+                showClose: true,
+                customClass: "zZindex"
+              });
           } else {
             Message({
               message: res.data.msg,
@@ -390,13 +412,33 @@ export default {
           }
         })
         .catch(err => {
-          Message({
-            message: "用户注册 失败 " + err.response.status,
-            center: true,
-            type: "warning",
-            showClose: true,
-            customClass: "zZindex"
-          });
+          _this.RegistLoading = false;
+          console.log("registered：", err.response.status);
+          if (err.response.status == 400) {
+            Message({
+              message: "工号已存在",
+              center: true,
+              type: "warning",
+              showClose: true,
+              customClass: "zZindex"
+            });
+          } else if (err.response.status == 403) {
+            Message({
+              message: "请先登陆,才能注册新用户",
+              center: true,
+              type: "warning",
+              showClose: true,
+              customClass: "zZindex"
+            });
+          } else {
+            Message({
+              message: "注册失败",
+              center: true,
+              type: "warning",
+              showClose: true,
+              customClass: "zZindex"
+            });
+          }
           console.log(err);
         });
     },
@@ -478,28 +520,6 @@ export default {
     },
 
     //测试专用 上线请注释
-    testApi() {
-      let _this = this;
-      //  Api.newGroup('测试5', '测试新建群组5')
-      //  Api.getGroupOfUser()
-      Api.getGroupMeta("9c54503a-02a2-401d-93c9-f1205d728422")
-        //  Api.updateGroupMeta("1b14d0b6-0054-4244-8685-5106fa3cdb54",'测试3', '测试新建群组3')
-        // Api.deleteGroup("1b14d0b6-0054-4244-8685-5106fa3cdb54")
-        // Api.addUserToGroup("9c54503a-02a2-401d-93c9-f1205d728422",['e1f5f562-2e96-4b3e-a6ff-e3f953c5b368'])
-        // Api.getUserOfGroup("9c54503a-02a2-401d-93c9-f1205d728422")
-        .then(res => {
-          console.log("返回的数据：", res);
-          if (res.data.status === 200) {
-            Message.warning("接口测试 成功");
-          } else {
-            Message.error(res.data.msg);
-          }
-        })
-        .catch(err => {
-          Message.warning("接口测试 失败");
-          console.log(err);
-        });
-    },
 
     cancelLogin() {
       this.loginData.visible = false;
@@ -543,5 +563,15 @@ export default {
 /* 用于将提示放在最上层 */
 .zZindex {
   z-index: 3000 !important;
+}
+.footerSize {
+  position:fixed;
+  width: 85%;
+  bottom: 0px;
+
+  height: 60px;
+  line-height: 60px;
+  margin-top: 0;
+  box-shadow: 0px -5px 6px 0px rgba(0, 0, 0, 0.05);
 }
 </style>

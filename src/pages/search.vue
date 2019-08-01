@@ -1,5 +1,5 @@
 <template>
-	<div class="cnt_back">
+	<div class="cnt_back" style="margin-top:80px;margin-bottom:60px">
 		<el-container class="cnt_width">
 			<el-header>
 				<div class="input-cnt">

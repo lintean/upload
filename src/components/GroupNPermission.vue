@@ -152,7 +152,12 @@
       @close="groupDrawer.addGroupVisible = false"
       :visible="groupDrawer.addGroupVisible"
     >
-      <el-input></el-input>
+       <el-row style="margin-top: 10px;">
+        <el-col :offset="1" :span="5" style="text-align: right;">群组名：</el-col>
+        <el-col :offset="2" :span="16">
+          <el-input type="text" v-model="groupMeta.group_name" size="small"></el-input>
+        </el-col>
+      </el-row>
     </a-drawer>
 
     <!-- 新建群组 -->
@@ -219,7 +224,14 @@ export default {
         group_name: "",
         group_desc: ""
       },
-      groupClickedIndex: 0
+      groupClickedIndex: 0,
+      
+     
+      newGroupMsg:{
+          permission:"100",
+           groupInfo:{},
+      },
+
     };
   },
   watch:{
@@ -285,12 +297,20 @@ export default {
       Api.newGroup(this.groupMeta.group_name, this.groupMeta.group_desc)
         .then(res => {
           if (res.data.status === 200) {
+            console.log(res.data);
             _this.$notify({
               title: "新建成功",
               message: "你已经新建群组，可以在添加群组中授予其权限",
               type: "success"
             });
+
+            _this.newGroupMsg.groupInfo = res.data.data;
+            _this.groupList.push(_this.newGroupMsg)
+
+            console.log( _this.newGroupMsg);
+
             _this.groupDrawer.newGroupVisible = false;
+
           } else {
             alert(res.data.msg);
           }
@@ -302,13 +322,15 @@ export default {
     },
     showGroupUser(index) {
       let _this = this;
-      Api.getUserOfGroup(this.groupList[index].groupInfo.group_id)
+      console.log(this.groupList[index].groupInfo.group_id)
+      Api.getGroupMeta(this.groupList[index].groupInfo.group_id)
         .then(res => {
           if (res.data.status === 200) {
+            this.groupDrawer.groupUserVisible = true;
+
             _this.groupClickedIndex = index;
             _this.groupUserList = res.data.data.memberList;
             _this.isCurrentGroupOwner = res.data.data.isOwner;
-            this.groupDrawer.groupUserVisible = true;
           } else {
             alert(res.data.msg);
           }

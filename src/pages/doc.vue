@@ -1,52 +1,106 @@
 <template>
-  <div style="padding: 24px;" @click="stopEditName">
-    <div style="height: 50px;">
-      <!-- 目录和文档的操作 -->
-      <div style="float: left" v-if="!isCurrentFileLayout">
-        <el-button type="primary" style="position: relative;" @click.stop="newResource('doc')">新建文档</el-button>
-        <el-button @click.stop="newResource('dir')">新建文件夹</el-button>
-        <el-button-group style="margin-left: 10px;" v-show="currentItemClicked > 0">
-          <el-button @click.stop="callChangeName">重命名</el-button>
-          <el-button @click.stop="resourceDelete">删除</el-button>
-          <el-button @click.stop="openMeta">属性</el-button>
-          <el-button @click.stop="callGroup">权限和群组</el-button>
-        </el-button-group>
-      </div>
-      <!-- 文件的操作 -->
-      <div style="float: left" v-if="isCurrentFileLayout">
-        <el-button type="primary" style="position: relative;" @click.stop="callUpload">上传文件</el-button>
-        <el-button-group style="margin-left: 10px;" v-show="currentItemClicked > 0">
-          <el-button @click.stop="downloadFile">下载</el-button>
-          <el-button @click.stop="callChangeName">重命名</el-button>
-          <el-button @click.stop="deleteFile">删除</el-button>
-          <el-button @click.stop="openMeta">属性</el-button>
-          <el-button>历史版本</el-button>
-        </el-button-group>
-      </div>
+  <div style="padding: 24px;margin-top:120px;margin-bottom:60px" @click="stopEditName">
+    <div
+      style="position: fixed;top: 60px;width: 80%;background-color: white;box-shadow: 0px 5px 6px 0 rgba(0,0,0,.05);"
+    >
+      <div style="height: 50px;">
+        <!-- 目录和文档的操作 -->
+        <div style="float: left" v-if="!isCurrentFileLayout">
+          <el-button icon="el-icon-tickets" @click.stop="newResource('dir')">新建目录</el-button>
+          <el-button
+          icon="el-icon-folder-add"
+            type="primary"
+            style="position: relative;"
+            @click.stop="newResource('doc')"
+          >新建文档</el-button>
+          <el-button-group style="margin-left: 10px;" v-show="currentItemClicked > 0">
+            <el-button @click.stop="callChangeName">重命名</el-button>
+            <el-button @click.stop="resourceDelete">删除</el-button>
+            <el-button @click.stop="openMeta">属性</el-button>
+            <el-button @click.stop="callGroup">权限和群组</el-button>
+          </el-button-group>
+        </div>
+        <!-- 文件的操作 -->
+        <div style="float: left" v-if="isCurrentFileLayout">
+          <el-button type="primary" style="position: relative;" @click.stop="callUpload" icon="el-icon-document-add">上传</el-button>
+          <el-button-group style="margin-left: 10px;" v-show="currentItemClicked > 0">
+            <el-button @click.stop="downloadFile">下载</el-button>
+            <el-button @click.stop="callChangeName">重命名</el-button>
+            <el-button @click.stop="deleteFile">删除</el-button>
+            <el-button @click.stop="openMeta">属性</el-button>
+            <el-button>历史版本</el-button>
+          </el-button-group>
+        </div>
 
-      <div style="float: right;">
-        <el-autocomplete
-          :fetch-suggestions="getKeyword"
-          @select="turnToSearch"
-          @keyup.native.enter.stop="turnToSearchByKeyword"
-          v-model="keyword"
-          placeholder="搜索你的资源"
+        <div style="float: right;">
+          <el-autocomplete
+            :fetch-suggestions="getKeyword"
+            @select="turnToSearch"
+            @keyup.native.enter.stop="turnToSearchByKeyword"
+            v-model="keyword"
+            placeholder="搜索你的资源"
+          >
+            <el-button type="primary" @click.stop="turnToSearchByKeyword" slot="append">搜索</el-button>
+          </el-autocomplete>
+        </div>
+      </div>
+      <!-- 显示面包屑（路径） -->
+      <div style="height: 40px;">
+        <el-breadcrumb
+          separator-class="el-icon-arrow-right"
+          class="breadcrumb_route"
+          style="float: left; "
         >
-          <el-button type="primary" @click.stop="turnToSearchByKeyword" slot="append">搜索</el-button>
-        </el-autocomplete>
+          <el-breadcrumb-item
+            v-for="(document, index) in path"
+            :key="index"
+            @click.native.stop="turnToPast(index)"
+          >{{document.title}}</el-breadcrumb-item>
+        </el-breadcrumb>
+
+        <!-- 刷新按钮 -->
+        <div style="float: right;">
+          <el-button
+            style="font-size: 16px;"
+            size="mini"
+            type="success"
+            icon="el-icon-refresh"
+            @click="refreshResource"
+            round
+          >刷新</el-button>
+        </div>
+
+        <!-- 图标大小 -->
+        <div style="float: right;  margin-right:2%">
+          <el-dropdown @command="chooseSize">
+            <el-button size="mini">
+              图标大小
+              <i class="el-icon-arrow-down el-icon--right"></i>
+            </el-button>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item command="small">小图标</el-dropdown-item>
+              <el-dropdown-item command="medium">中图标</el-dropdown-item>
+              <el-dropdown-item command="big">大图标</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+        </div>
+
+        <!-- 排列方式 -->
+            <div style="float: right;  margin-right:2%">
+          <el-dropdown>
+            <el-button size="mini">
+              排列方式
+              <i class="el-icon-arrow-down el-icon--right"></i>
+            </el-button>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item disabled>修改日期</el-dropdown-item>
+              <el-dropdown-item disabled>名字</el-dropdown-item>
+              <el-dropdown-item disabled>默认</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+        </div>
       </div>
     </div>
-    <!-- 显示面包屑（路径） -->
-    <div>
-      <el-breadcrumb separator-class="el-icon-arrow-right" class="breadcrumb_route">
-        <el-breadcrumb-item
-          v-for="(document, index) in path"
-          :key="index"
-          @click.native.stop="turnToPast(index)"
-        >{{document.title}}</el-breadcrumb-item>
-      </el-breadcrumb>
-    </div>
-
     <div class="light_divider"></div>
     <!-- 显示目录和文档 -->
     <div
@@ -62,9 +116,11 @@
         @click.native.stop="clickReady && itemClicked(index)"
         @dblclick.native.stop="clickReady && itemDBClicked(index)"
         class="document_card"
-        :class="{'item_clicked': currentItemClicked == index, 'dc': !doc.isEditStatus}"
+        :class="{'item_clicked': currentItemClicked === index, 'dc': !doc.isEditStatus}"
         :doc="doc"
         :index="index"
+        :styleCardImage="styleCardImages"
+        :style="styleObject"
       ></resource-card>
     </div>
 
@@ -136,7 +192,18 @@ export default {
       downloadUrl: "",
       downloadName: "",
       //文件点击后的loading动画
-      cardLoading: false
+      cardLoading: false,
+
+      // 设置图标大小的
+      cardSize: "",
+      styleCardImages: {
+        width: "150px",
+        height: "150px"
+      },
+      styleObject: {
+        width: "151px",
+        height: "195px"
+      }
     };
   },
   computed: {
@@ -167,7 +234,7 @@ export default {
       this.currentResourceBackup != null &&
       this.$store.state.idOfThePathJust != null
     ) {
-      //设置 当前页面资源的id
+      //设置 当前页面资源的id 用vuex可以避免初始化问题
       this.currentResource.id = this.$store.state.idOfThePathJust;
       this.currentResource.type = this.$store.state.typeOfThePathJust;
     }
@@ -177,6 +244,7 @@ export default {
       // this.refreshResource();
     }
   },
+
   methods: {
     itemClicked(i) {
       clearTimeout(time); //首先清除计时器
@@ -191,13 +259,14 @@ export default {
     },
     itemDBClicked(index) {
       if (index > 0 && this.isCurrentFileLayout) {
+        // console.log(index, "  ", this.docList[index].id);
+
         window.open(
           "http://" +
             window.location.host +
             window.location.pathname +
             "singleFile.html#/?fileId=" +
-            this.docList[index].id,
-          "_sdfsf"
+            this.docList[index].id
         );
         return;
       }
@@ -215,6 +284,11 @@ export default {
     },
     refreshResource() {
       // console.log("refreshResource");
+      // 渲染图标card大小
+      this.chooseSize(this.$store.state.whatSizeCard);
+      // console.log(this.$store.state.whatSizeCard);
+      this.cardLoading = true;
+
       // console.log("refreshResource", this.currentResource.id);
 
       let _this = this;
@@ -232,7 +306,7 @@ export default {
             if (_this.path.length > 1) {
               _this.docList.push({
                 title: "返回",
-                thumbnail_url: require("../assets/back.png"),
+                thumbnail_url: require("../assets/images/back.png"),
                 type: "dir",
                 id: _this.path[_this.path.length - 2].id,
                 isEditStatus: false
@@ -290,13 +364,12 @@ export default {
             if (_this.path.length > 1) {
               _this.docList.push({
                 title: "返回",
-                thumbnail_url: require("../assets/back.png"),
+                thumbnail_url: require("../assets/images/back.png"),
                 type: "dir",
                 id: _this.path[_this.path.length - 2].id,
                 isEditStatus: false
               });
             }
-             _this.cardLoading = false;
             // 处理结果(统一部分)
             _this.handleResource(res);
           } else {
@@ -346,30 +419,36 @@ export default {
             // 根目录没有返回
             _this.docList.push({
               title: "返回",
-              thumbnail_url: require("../assets/back.png"),
+              thumbnail_url: require("../assets/images/back.png"),
               type: "dir",
               id: parent_id,
               isEditStatus: false
             });
-            //结束loading动画
-            _this.cardLoading = false;
-              // 处理结果(统一部分)
-              _this.handleResource(res);
+
+            // 处理结果(统一部分)
+            _this.handleResource(res);
           } else {
             Message.error(res.data.msg);
           }
         })
         .catch(err => {
-          // console.log("goToNext")
-          Message.error("操作失败 请先登陆或刷新");
-          // _this.handleError(err);
+          if (err.response.status == 403) {
+            Message.error("您没有权限 无法打开 ");
+            this.cardLoading = false;
+          } else {
+            // console.log("goToNext")
+            Message.error("操作失败 请先登陆或刷新");
+            // _this.handleError(err);
+          }
         });
     },
 
+    //分配图片的函数
     handleResource(res) {
-      // console.log("handleResource", res.data.data.length);
-
+      // console.log(res.data.data);
       for (let i = 0; i < res.data.data.length; ++i) {
+        // console.log(i,res.data.data[i].thumbnail_url);
+
         if (res.data.data[i].thumbnail == "./assets/images/docCnt.png")
           res.data.data[
             i
@@ -380,16 +459,22 @@ export default {
           Message.warning("缩略图生成中");
           res.data.data[i].thumbnail_url = require("../assets/images/file.png");
         }
+        if (res.data.data[i].thumbnail_url == "default") {
+          res.data.data[i].thumbnail_url = require("../assets/images/file.png");
+        }
         res.data.data[i].isEditStatus = false;
       }
 
       this.docList = this.docList.concat(res.data.data);
 
-      // console.log(this.docList);
-
+      //结束loading动画
+      this.cardLoading = false;
       // 初始化点击
       this.currentItemClicked = -1;
       this.clickReady = true;
+
+      // console.log(this.docList);
+      // this.chooseSize(this.cardSize);
     },
     downloadFile() {
       let _this = this;
@@ -618,6 +703,27 @@ export default {
     handleError(err) {
       console.log(err);
       Message.warning(DEFAULT.defaultNetwordError);
+    },
+
+    chooseSize(command) {
+      this.$store.commit("setwhatSizeCard", command);
+      // this.cardSize = command;
+      if (command === "small") {
+        this.styleObject.width = "101px";
+        this.styleObject.height = "140px";
+        this.styleCardImages.width = "101px";
+        this.styleCardImages.height = "101px";
+      } else if (command === "medium") {
+        this.styleObject.width = "151px";
+        this.styleObject.height = "195px";
+        this.styleCardImages.width = "150px";
+        this.styleCardImages.height = "150px";
+      } else if (command === "big") {
+        this.styleObject.width = "202.5px";
+        this.styleObject.height = "260px";
+        this.styleCardImages.width = "202px";
+        this.styleCardImages.height = "202px";
+      }
     }
   }
 };
@@ -626,7 +732,7 @@ export default {
 <style>
 .divider {
   background-color: #dcdfe6;
-  position: relative;
+  /* position: relative; */
   display: block;
   height: 1px;
   width: 100%;
@@ -693,10 +799,11 @@ export default {
 .breadcrumb_route :hover {
   color: rgb(64, 158, 655);
 }
-
+/* 卡片 */
 .document_card {
-  width: 202.5px;
-  height: 260px;
+  width: 150px;
+  height: 195px;
+  max-height: 260px;
   margin-right: 10px;
   margin-bottom: 10px;
   cursor: pointer;

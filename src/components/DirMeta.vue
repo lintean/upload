@@ -44,7 +44,10 @@
 		],
 		watch:{
 			dirMetaVisible(){
-				//时间里面有个T,去除一下
+				// console.log("dir created_time: ",this.dirMeta.created_time)
+				// ’2019-07-28T12:15:27.337+0000‘
+				//这种目录独有的时间表达方式 就很固定
+				//永远少8小时 多出个T
 				var year = this.dirMeta.created_time.substr(0,10);
 				var hoursT = this.dirMeta.created_time.substr(10,3);
 				var minAndSecon = this.dirMeta.created_time.substr(13,6);

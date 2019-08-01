@@ -1,11 +1,5 @@
 <template>
-  <a-drawer
-    width="360"
-    :closable="false"
-    @close="close"
-    :visible="docMetaVisible"
-    
-  >
+  <a-drawer width="360" :closable="false" @close="close" :visible="docMetaVisible">
     <div slot="title">
       <span>文档属性</span>
       <el-button
@@ -92,14 +86,14 @@
 import { mapState } from "vuex";
 import * as DEFAULT from "../json/default";
 import * as Api from "../api/api";
-import {  Message,Loading } from "element-ui";
+import { Message, Loading } from "element-ui";
 export default {
   name: "DocMeta",
   data() {
     return {
       // 文档meta
-	  docEditMetaVisible: false,
-	  DocLoading: true,
+      docEditMetaVisible: false,
+      DocLoading: true,
       docMeta: {
         id: "1",
         title: "****",
@@ -140,31 +134,32 @@ export default {
             _this.docMeta = JSON.parse(JSON.stringify(_this.docEditMeta));
             _this.docEditMetaVisible = false;
             _this.$parent.itemDBClicked(-1);
-             Message.success("修改成功")
+            Message.success("修改成功");
           } else {
-             Message.error(res.data.msg);
+            Message.error(res.data.msg);
           }
         })
         .catch(err => {
-             Message.error("修改失败 "+ err.response.status);
+          Message.error("修改失败 " + err.response.status);
 
           // _this.handleError(err);
         });
     },
     getDocMeta() {
       let _this = this;
-      //新建loading实例
-	//   let DocLoading = Loading.service({ text: "请稍等",
-	//  	 target: document.querySelector('.loadingMsg')
-	//   });
+
       Api.getDocMeta(this.clickedItemId)
         .then(res => {
           if (res.data.status === 200) {
             _this.docMeta = res.data.data;
             _this.docEditMeta = JSON.parse(JSON.stringify(_this.docMeta));
-			//关闭loading动画
-			this.DocLoading=false;
+            //关闭loading动画
+            this.DocLoading = false;
             // DocLoading.close();
+
+            // console.log("Doc created_time: ",res.data.data.created_time);
+            // console.log("Doc modified_time: ",res.data.data.modified_time);
+
           } else {
             _this.$message.error(res.data.msg);
           }

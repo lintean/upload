@@ -147,6 +147,10 @@ export default {
             _this.getFileCategories();
             _this.getFileTags();
             _this.fileloading = false;
+
+
+            // console.log("File created_time: ",res.data.data.created_time);
+            // console.log("File modified_time: ",res.data.data.modified_time);
           } else {
             _this.$message.error(res.data.msg);
           }
@@ -170,6 +174,8 @@ export default {
             _this.fileMeta = JSON.parse(JSON.stringify(_this.fileEditMeta));
             _this.$parent.itemDBClicked(-1);
             _this.fileEditMetaVisible = false;
+
+            
           } else {
             _this.$message.error(res.data.msg);
           }

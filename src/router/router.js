@@ -26,5 +26,5 @@ export default new Router({
 			name: 'file',
 			component: File
 		}
-	]
+	],
 })
