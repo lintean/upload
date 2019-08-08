@@ -1,47 +1,38 @@
 <template>
-  <a-drawer width="360" :closable="false" @close="close" :visible="docMetaVisible">
+  <a-drawer
+    width="270"
+    getContainer="section"
+    :mask="false"
+    @close="close"
+    :visible="docMetaVisible"
+  >
     <div slot="title">
       <span>文档属性</span>
+    </div>
+    <div class="loadingMsg" v-loading="DocLoading" element-loading-text="请稍后">
       <el-button
-        style="position: absolute; top: 10px; right: 10px;"
         size="small"
         @click="docEditMetaVisible = true"
         icon="el-icon-edit"
         type="primary"
         plain
       ></el-button>
-    </div>
-    <div class="loadingMsg" v-loading="DocLoading" element-loading-text="请稍后">
-      <el-row style="margin-top: 10px;">
-        <el-col :offset="1" :span="5" style="text-align: right;">文档名：</el-col>
-        <el-col :offset="2" :span="16">
-          <span>{{docMeta.title}}</span>
-        </el-col>
-      </el-row>
+      <el-row style="margin-top: 10px;color: #9DA2B3;">文档名：</el-row>
+      <el-row>{{docMeta.title}}</el-row>
       <!-- 			<el-row style="margin-top: 10px;">
 			<el-col :offset="1" :span="5" style="text-align: right;">创建者：</el-col>
 			<el-col :offset="2" :span="16">
 				<span>{{docMeta.creator}}</span>
 			</el-col>
       </el-row>-->
-      <el-row style="margin-top: 10px;">
-        <el-col :offset="1" :span="5" style="text-align: right;">创建时间：</el-col>
-        <el-col :offset="2" :span="16">
-          <span>{{docMeta.created_time.substr(0,19)}}</span>
-        </el-col>
-      </el-row>
-      <el-row style="margin-top: 10px;">
-        <el-col :offset="1" :span="5" style="text-align: right;">修改时间：</el-col>
-        <el-col :offset="2" :span="16">
-          <span>{{docMeta.modified_time.substr(0,19)}}</span>
-        </el-col>
-      </el-row>
-      <el-row style="margin-top: 10px;">
-        <el-col :offset="1" :span="5" style="text-align: right;">简介：</el-col>
-        <el-col :offset="2" :span="16">
-          <span>{{docMeta.desc}}</span>
-        </el-col>
-      </el-row>
+      <el-row style="margin-top: 10px;color: #9DA2B3;">创建时间：</el-row>
+      <el-row v-if="docMeta.created_time==undefined"></el-row>
+      <el-row v-if="docMeta.created_time!=undefined">{{docMeta.created_time.substr(0,16)}}</el-row>
+      <el-row style="margin-top: 10px;color: #9DA2B3;">修改时间</el-row>
+      <el-row v-if="docMeta.modified_time==undefined"></el-row>
+      <el-row v-if="docMeta.modified_time!=undefined">{{docMeta.modified_time.substr(0,16)}}</el-row>
+      <el-row style="margin-top: 10px;color: #9DA2B3;">简介</el-row>
+      <el-row>{{docMeta.desc}}</el-row>
     </div>
     <!-- 文档meta修改 -->
     <a-drawer
@@ -110,6 +101,7 @@ export default {
       }
     };
   },
+  //从vuex中获取 是否显示
   computed: {
     ...mapState(["docMetaVisible"])
   },
@@ -117,6 +109,12 @@ export default {
   watch: {
     docMetaVisible(newOne, oldOne) {
       if (newOne && this.clickedItemId != "") {
+        this.getDocMeta();
+      }
+    },
+    clickedItemId() {
+      if (this.docMetaVisible == true) {
+        // console.log(this.clickedItemId);
         this.getDocMeta();
       }
     }
@@ -147,6 +145,7 @@ export default {
     },
     getDocMeta() {
       let _this = this;
+      this.DocLoading = true;
 
       Api.getDocMeta(this.clickedItemId)
         .then(res => {
@@ -159,13 +158,12 @@ export default {
 
             // console.log("Doc created_time: ",res.data.data.created_time);
             // console.log("Doc modified_time: ",res.data.data.modified_time);
-
           } else {
             _this.$message.error(res.data.msg);
           }
         })
         .catch(err => {
-          _this.handleError(err);
+          _this.$message.error(err);
         });
     },
     close() {
@@ -175,7 +173,7 @@ export default {
     },
     handleError(err) {
       console.log(err);
-      _this.$message.warning(DEFAULT.defaultNetwordError);
+      this.$message.warning(DEFAULT.defaultNetwordError);
     }
   }
 };

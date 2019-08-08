@@ -4,6 +4,8 @@ import App from '../App'
 import Doc from '../pages/doc'
 import Search from '../pages/search'
 import File from '../subpage/SingleFile'
+import User from '../pages/user'
+
 
 Vue.use(Router)
 
@@ -25,6 +27,11 @@ export default new Router({
 			path: '/file',
 			name: 'file',
 			component: File
+		},
+		{
+			path:'/user',
+			name:'user',
+			component:User
 		}
 	],
 })

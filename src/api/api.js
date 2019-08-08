@@ -12,9 +12,12 @@ axios.defaults.withCredentials = true;
 // export const baseUrl = "http://192.168.43.211:8080/v1";
 // export const baseUrl = "http://localhost:8080/v1";
 // export const baseUrl = "http://localhost/v1";
-//douban库
+
+//douban库 
 export const baseUrl = "http://39.108.210.48:8089/v1";
-//legal库
+export const baseUrl2 = "http://39.108.210.48:8089/v2";
+
+//legal库 
 // export const baseUrl = "http://39.108.210.48:18090/v1";
 
 
@@ -71,10 +74,17 @@ export const Logout = () => {
 // };
 export const getGroupOfUser = () => {
 	return new axios({
-		url: baseUrl + '/v1/users/current/groups',
+		url: baseUrl + '/users/current/groups',
 		method: GET
 	})
 };
+// U6根据工号获取id
+export const getUserId = (work_no) =>{
+	return new axios({
+		url: baseUrl + '/users/'+work_no+'/workno',
+		method: GET
+	})
+}
 
 // 检索相关
 
@@ -228,7 +238,7 @@ export const deleteDoc = (doc_id) => {
 // D5 统一	获取下级资源
 export const getResources = (type, resource_id) => {
 	return new axios({
-		url: baseUrl + '/' + type + 's/' + resource_id + '/slaves',
+		url: baseUrl+'/' + type + 's/' + resource_id + '/slaves',
 		method: GET
 	})
 }
@@ -239,10 +249,12 @@ export const getDir = (dir_id) => {
 		method: GET
 	})
 };
-// D5.2	获取指定文档下的文件
+// D5.2	获取指定文档下的文件 url这么长是为了获取最大的数量
+//你有超过1w数量   算我输
 export const getDoc = (doc_id) => {
 	return new axios({
-		url: baseUrl + '/docs/' + doc_id + '/slaves',
+		url: baseUrl2 + '/docs/' + doc_id + '/slaves?page=1&per_page=10000',
+		
 		method: GET
 	})
 };
@@ -378,21 +390,21 @@ export const deleteUserOfGroup = (group_id, member_id) => {
 
 // 权限部分
 // P1	添加群组对指定目录或文档的操作权限
-export const addPermission = (resource_id, permission, groupsIdList) => {
+export const addPermission = (resource_id, permission, groupsIdList,resource_type) => {
 	return new axios({
-		url: baseUrl + '/resources/' + resource_id + '/permissions',
+		url: baseUrl + '/'+resource_type+'s'+'/' + resource_id + '/permissions',
 		data: {
 			'permission': permission,
-			'groupsIdList': groupsIdList
+			'groups': groupsIdList
 		},
 		method: POST
 	})
 };
 
 // P2	撤销群组对指定目录或文档的操作权限
-export const deletePermission = (resource_id, group_id) => {
+export const deletePermission = (resource_id, group_id,resource_type) => {
 	return new axios({
-		url: baseUrl + '/resources/' + resource_id + '/permissions',
+		url: baseUrl + '/'+resource_type+'s'+'/' + resource_id + '/permissions',
 		data: {
 			'group_id': group_id
 		},
@@ -400,10 +412,10 @@ export const deletePermission = (resource_id, group_id) => {
 	})
 };
 
-// P3	获取对指定资源有操作权限的群组信息
-export const getGroupOfResourceHadPermission = (resource_id) => {
+// P3	获取对指定资源有操作权限的群组信息 接口url要多加‘s’
+export const getGroupOfResourceHadPermission = (resource_id,resource_type) => {
 	return new axios({
-		url: baseUrl + '/resources/' + resource_id + '/authgroups',
+		url: baseUrl + '/'+resource_type+'s'+'/' + resource_id + '/authgroups',
 		method: GET
 	})
 };

@@ -9,9 +9,9 @@
         alt="fileImage"
         style="width:100%;height: 100%;"
       >
-      <!-- <div slot="error" class="image-slot">
-        <i class="el-icon-picture-outline">加载失败 无法打开缩略图</i>
-      </div> -->
+      <div slot="error">
+        <img src="../assets/images/imageF.svg" alt="加载失败" style="width:100%;height: 100%;">
+      </div>
       </el-image>
     </div>
     <div class="divider" style="margin: 0 0 5px 0;"></div>

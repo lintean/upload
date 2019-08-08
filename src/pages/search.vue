@@ -121,6 +121,8 @@
 								<span class="card_text" v-html="item.title_highlight">{{item.title_highlight + '.' + item.ext}}</span>
 							</el-card>
 
+							<!-- 简介popover -->
+
 							<div class="popover_content">
 								<el-row style="margin-top: 10px;">
 									<el-col :offset="1" :span="5" style="text-align: right;">文件名：</el-col>

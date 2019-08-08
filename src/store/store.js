@@ -6,6 +6,7 @@ Vue.use(Vuex);
 export default new Vuex.Store({
 	state: {
 		// 登陆获得的初始信息,仅存储
+		userInformation:null,
 		pathBackup: [],
 		currentResourceBackup: null,
 
@@ -22,9 +23,16 @@ export default new Vuex.Store({
 		typeOfThePathJust:null,
 
 		//这个值用于 从其他页面返回后 还能到是自己选的图标card大小
-		whatSizeCard:""
+		whatSizeCard:"",
+
+		//这个值用于 从其他页面返回后 还能到是自己选的列表或图标
+		ListOrNot:false,
 	},
 	mutations: {
+		setUserInforFromAppVue(state,infor){
+			state.userInformation = infor
+
+		},
 		setwhatSizeCard(state,size){
 			state.whatSizeCard = size;
 		},
@@ -42,6 +50,9 @@ export default new Vuex.Store({
 			state.currentResourceBackup = payload.currentResourceBackup;
 		},
 
+		setListOrNot(state, yesno) {
+			state.ListOrNot = yesno;
+		},
 		// visible
 		groupV(state) {
 			state.groupVisible = true;

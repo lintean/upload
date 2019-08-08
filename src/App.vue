@@ -2,45 +2,73 @@
   <div id="app">
     <!-- 侧边栏 -->
     <el-container>
-      <el-aside style="width: 13% !important;">
+      <!-- <el-aside style="width: 13% !important;"> -->
+      <el-aside style="width: 200px;">
+        <div
+          style="background-color: #001529; width: 200px;opacity: 0.95; height: 60px;; position: fixed;"
+        >
+          <!-- <el-image :src="require('./assets/images/favicon.png')" style="width: 40%;"></el-image> -->
+          <p style="text-align: left;padding:10px 0 5px 10px;margin:0;">
+            <img src="./assets/images/favicon.png" alt width="30%;" />
+          </p>
+        </div>
         <a-menu
           :selectedKeys="selectedKeys"
-          :defaultOpenKeys="['sub1']"
+          :defaultOpenKeys="['2']"
           mode="inline"
           theme="dark"
           :inlineCollapsed="collapsed"
-          style="height: 100%; text-align: left; position: fixed; width: 180px"
+          style="height: 100%; text-align: left; position: fixed; width: 200px;margin-top: 60px;"
           @click="changeRoute"
         >
-          <a-menu-item key="1" disabled>
+          <a-menu-item key="1">
             <a-icon type="user" />
             <span>个人信息</span>
           </a-menu-item>
+          <!-- 
           <a-sub-menu key="sub1">
             <span slot="title">
               <a-icon type="file-text" />
               <span>文档管理</span>
-            </span>
-            <a-menu-item key="2">个人文档</a-menu-item>
-            <a-menu-item key="3" disabled>部门文档</a-menu-item>
-          </a-sub-menu>
+          </span>-->
+          <a-menu-item key="2">
+            <a-icon type="file-text" />
+            <span>个人文档</span>
+          </a-menu-item>
+          <a-menu-item key="3" disabled>
+            <a-icon type="file-text" />
+            <span>部门文档</span>
+          </a-menu-item>
+          <!-- </a-sub-menu> -->
+
           <a-menu-item key="4">
             <a-icon type="file-search" />
             <span>文档检索</span>
           </a-menu-item>
-          <!-- <el-button @click="testApi">接口测试按钮</el-button> -->
         </a-menu>
       </el-aside>
 
       <el-container>
         <el-header
-          style="position: fixed;    z-index: 999;background-color: white;height: 60px;margin-left: 24px;width: 80%; line-height: 60px; "
+          style="position: fixed;z-index: 999;background-color: white;height: 60px;width: 100%; line-height: 60px;box-shadow: 0px 5px 6px 0 rgba(0,0,0,.07); "
         >
           <el-image
             :src="require('./assets/logo.png')"
             style="height: 50px; width: 240px; padding: 5px 0; float: left;"
           ></el-image>
-          <div style="float: right; ">
+          <div style="float: left;width: 30%;margin: 0 0 0 14%;" v-if="noSearchPage">
+            <el-autocomplete
+            style="width: 100%;"
+              :fetch-suggestions="getKeyword"
+              @select="turnToSearch"
+              @keyup.native.enter.stop="turnToSearchByKeyword"
+              v-model="keyword"
+              placeholder="搜索你的资源"
+            >
+              <el-button icon="el-icon-search" type="primary" @click.stop="turnToSearchByKeyword" slot="append"></el-button>
+            </el-autocomplete>
+          </div>
+          <!-- <div style="float: right; margin-right:10%" v-if="(!loginData.isLogin)">
             <el-button
               style="font-size: 16px;"
               size="mini"
@@ -48,22 +76,48 @@
               icon="el-icon-edit-outline"
               @click="registeredData.visible = true"
             >注册</el-button>
-          </div>
+          </div>-->
           <!-- 右上角用户小弹窗 -->
-          <div style="float: right;" v-if="(loginData.isLogin)">
-            <el-popover trigger="hover" placement="bottom" width="150">
-              <p>欢迎使用 {{loginData.currentUserName}}</p>
-              <el-button @click="logout" style="float: right;">注销</el-button>
+          <div style="float: right; margin-right:10%" v-if="(loginData.isLogin)">
+            <el-popover trigger="click" placement="bottom" width="150">
+              <p style="text-align: center;">{{loginData.currentUserName}}</p>
+
               <el-button
-                slot="reference"
-                style="font-size: 18px; color: #303133;margin-right:24px;"
                 type="text"
-                icon="el-icon-user-solid"
-              >{{loginData.currentUserName}}</el-button>
+                icon="el-icon-user"
+                @click="changeRoute({key: '1'})"
+                size="mini"
+                style="display:block;margin:0 auto;font-size: 14px;color: #303133;"
+              >个人中心</el-button>
+              <div
+                style="margin:0;display: block;height: 1px;width: 100%;background-color: #DCDFE6;position: relative;
+                margin:5px"
+              ></div>
+              <el-button
+                type="text"
+                icon="el-icon-switch-button"
+                @click="logout"
+                size="mini"
+                style="display:block;margin:0 auto;font-size: 14px;"
+              >退出登陆</el-button>
+              <div
+                style="margin:0;display: block;height: 1px;width: 100%;background-color: #DCDFE6;position: relative;
+                margin:5px"
+              ></div>
+              <el-button
+                type="text"
+                style="display:block;margin:0 auto;font-size: 14px;"
+                size="mini"
+                icon="el-icon-edit-outline"
+                @click="registeredData.visible = true"
+              >注册</el-button>
+              <p slot="reference" style="text-align: center;" type="text">
+                <img src="./assets/images/me.png" alt width="35%;" />
+              </p>
             </el-popover>
           </div>
           <!-- 右上角 登陆按钮 -->
-          <div style="float: right;" v-if="(!loginData.isLogin)">
+          <div style="float: right; margin-right:15%" v-if="(!loginData.isLogin)">
             <el-button
               style="font-size: 16px;margin-right:24px;"
               size="mini"
@@ -166,6 +220,9 @@ export default {
   name: "app",
   data() {
     return {
+      // 搜索
+      keyword: "",
+      noSearchPage:true,
       //loading动画
       LoginLoading: false,
       RegistLoading: false,
@@ -240,11 +297,14 @@ export default {
         }
       },
       // 页脚内容
-      footerText: "华喜科技 @2019",
+      footerText: "华喜科技 天盛科技 华南理工大学 Micerlabs@2019",
 
       // 侧边栏
       collapsed: false,
-      selectedKeys: ["2"]
+      selectedKeys: ["2"],
+
+      circleUrl:
+        "https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png"
     };
   },
   mounted: function() {
@@ -262,9 +322,11 @@ export default {
       .then(res => {
         // console.log("getUser:", res);
         if (res.data.status === 200) {
+          //vuex 用户信息
+          _this.$store.commit("setUserInforFromAppVue", res.data.data);
           _this.recordLoginData(res);
           Message({
-            message: "获取用户数据 成功 ",
+            message: "用户登陆成功 ",
             center: true,
             type: "success",
             showClose: true,
@@ -288,6 +350,7 @@ export default {
     this.changeKeys(window.location.hash);
   },
   watch: {
+    //为了能左边菜单高亮显示
     $route(to, from) {
       this.changeKeys(window.location.hash);
     }
@@ -309,7 +372,7 @@ export default {
       _this.loginData.currentUserEmail = res.data.data.userInfo.email;
       _this.loginData.isLogin = true;
 
-      // 目录信息
+      // vuex 目录信息
       this.$store.commit({
         type: "setCurrentResourceBackup",
         currentResourceBackup: {
@@ -336,7 +399,7 @@ export default {
         type: "setPathBackup",
         pathBackup: path
       });
-	 
+
       this.$root.eventHub.$emit("login");
     },
     login() {
@@ -345,6 +408,8 @@ export default {
       //调用接口 用户登陆
       Api.Login(this.loginData.user, this.loginData.pwd)
         .then(res => {
+          //vuex 用户信息
+          _this.$store.commit("setUserInforFromAppVue", res.data.data);
           //   console.log("Login：", res);
           if (res.data.status === 200) {
             _this.recordLoginData(res);
@@ -372,7 +437,7 @@ export default {
           this.LoginLoading = false;
 
           Message({
-            message: "账号密码不正确 " + err.response.status,
+            message: "账号密码不正确 " + err,
             center: true,
             type: "warning",
             showClose: true,
@@ -414,7 +479,7 @@ export default {
         })
         .catch(err => {
           _this.RegistLoading = false;
-          console.log("registered：", err.response.status);
+          console.log("registered：", err);
           if (err.response.status == 400) {
             Message({
               message: "工号已存在",
@@ -477,26 +542,31 @@ export default {
     },
     // 侧边栏
     changeRoute(e) {
+      // console.log(e);
       switch (e.key) {
         case "1": {
+          // console.log("toUser");
+          this.$router.push({
+            path: "/user"
+          });
           break;
         }
         case "2": {
-          console.log("toDoc");
+          // console.log("toDoc");
           this.$router.push({
             path: "/doc"
           });
           break;
         }
         case "3": {
-          console.log("toDoc");
+          // console.log("toDocGroup");
           this.$router.push({
             path: "/doc"
           });
           break;
         }
         case "4": {
-          console.log("toSearch");
+          // console.log("toSearch");
           this.$router.push({
             path: "/search"
           });
@@ -504,10 +574,25 @@ export default {
         }
       }
     },
+    //为了能左边菜单高亮显示
+    //监测url改变 然后高亮显示左边对应选项
     changeKeys(hash) {
       console.log(hash);
-      if (hash == "#/doc") this.selectedKeys = ["2"];
-      if (hash == "#/search") this.selectedKeys = ["4"];
+      if (hash == "#/doc") {
+        this.selectedKeys = ["2"];
+        this.noSearchPage = true;
+      }
+
+      if (hash.search("#/search") != -1) {
+        this.selectedKeys = ["4"];
+        this.noSearchPage = false;
+
+      }
+      if (hash == "#/user") {
+        this.selectedKeys = ["1"];
+        this.noSearchPage = true;
+
+      }
     },
     handleError(err) {
       console.log(err);
@@ -540,6 +625,54 @@ export default {
         showClose: true,
         customClass: "zZindex"
       });
+    },
+
+    getKeyword(keyword, cb) {
+      let _this = this;
+      _this.cardLoading = true;
+      Api.Suggestions("all", this.keyword, 10)
+        .then(res => {
+          if (res.data.status === 200) {
+            // 数组清空
+            let searchSuggestions = [];
+            for (let i = 0; i < res.data.data.length; ++i) {
+              let temp = {
+                value: res.data.data[i]
+              };
+              searchSuggestions.push(temp);
+            }
+            cb(searchSuggestions);
+            _this.cardLoading = false;
+          } else {
+            Message.error(res.data.msg);
+          }
+        })
+        .catch(err => {
+          console.log("getKeyword");
+
+          _this.handleError(err);
+          _this.cardLoading = false;
+        });
+    },
+    turnToSearch(item) {
+      this.$router.push({
+        path: "/search",
+        query: {
+          keyword: item.value,
+          resourceId: null
+        }
+      });
+      this.changeKeys(window.location.hash);
+    },
+    turnToSearchByKeyword() {
+      this.$router.push({
+        path: "/search",
+        query: {
+          keyword: this.keyword,
+          resourceId: null
+        }
+      });
+      this.changeKeys(window.location.hash);
     }
   }
 };
@@ -566,7 +699,7 @@ export default {
   z-index: 3000 !important;
 }
 .footerSize {
-  position:fixed;
+  position: fixed;
   width: 85%;
   bottom: 0px;
 

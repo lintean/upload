@@ -1,11 +1,20 @@
 export const gl = [{
-	"permission": "100",
+	// "permission": "100",
+	// "groupInfo": {
+	// 	"group_id": "75895fa6-9054-49cf-8db2-08312f1766d8",
+	// 	"group_name": "巴萨球迷",
+	// 	"group_desc": "巴萨是最菜的",
+	// 	"creator_id": "e1f5f562-2e96-4b3e-a6ff-e3f953c5b368",
+	// 	"created_at": "2019-07-09T17:05:39.321+0000",
+	// 	"personal": 0
+	// }
+	"permission": "",
 	"groupInfo": {
-		"group_id": "75895fa6-9054-49cf-8db2-08312f1766d8",
-		"group_name": "巴萨球迷",
-		"group_desc": "巴萨是最菜的",
-		"creator_id": "e1f5f562-2e96-4b3e-a6ff-e3f953c5b368",
-		"created_at": "2019-07-09T17:05:39.321+0000",
+		"group_id": "",
+		"group_name": "",
+		"group_desc": "",
+		"creator_id": "",
+		"created_at": "",
 		"personal": 0
 	}
 }]
@@ -26,21 +35,21 @@ export const docs = [{
 	"thumbnail_url": require("../assets/back.png"), //缩略图
 	"resource_type": "doc", // 资源类型
 	"creator": "", // 创建者id
-	"created_time": "****-**-** **:**:**" // 创建时间
+	"created_time": "" // 创建时间
 }];
 
 export const dirMetaI = {
-	"title": "目录名",
-	"created_time": "****.**.**"
+	"title": "",
+	"created_time": ""
 }
 
 export const defaultResource = {
 	"id": null,
-	"title": "默认目录",
+	"title": "",
 	"thumbnail_url": require("../assets/back.png"),
 	"type": "dir",
 	"creator": "",
-	"created_time": "**-**-** **:**:**"
+	"created_time": ""
 }
 
 export const fm = {
